@@ -1,40 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Photo Gallery</title>
-  <meta name="description" content="A minimal, Anthropic-inspired photo gallery powered by Lightroom exports">
-  
-  <!-- CSS Files -->
-  <link rel="stylesheet" href="assets/css/variables.css">
-  <link rel="stylesheet" href="assets/css/base.css">
-  <link rel="stylesheet" href="assets/css/gallery.css">
-  <link rel="stylesheet" href="assets/css/lightbox.css">
-  <link rel="stylesheet" href="assets/css/animations.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fine Art Collection - Gediminaš Zdancius</title>
+    <meta name="description" content="Immerse yourself in a curated selection of fine art pieces that capture nature's beauty.">
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="assets/css/variables.css">
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/navigation.css">
+    <link rel="stylesheet" href="assets/css/home.css">
+    <link rel="stylesheet" href="assets/css/animations.css">
 </head>
 <body>
-  
-  <!-- Gallery Container -->
-  <div class="gallery-container">
     
-    <!-- Gallery Header -->
-    <header class="gallery-header">
-      <h1 class="gallery-title">Photo Gallery</h1>
-      <p class="gallery-description">A curated collection</p>
-    </header>
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <h1>Fine Art<br>Collection</h1>
+                <p class="logo-subtitle">Gediminaš Zdancius</p>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="active">HOME</a></li>
+                <li><a href="store.html">STORE</a></li>
+                <li><a href="color.html">COLOR</a></li>
+                <li><a href="monochrome.html">MONOCHROME</a></li>
+                <li><a href="artist.html">THE ARTIST</a></li>
+                <li><a href="stories.html">STORIES & SOUND</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h2 class="hero-title fade-in">Immerse yourself in a curated selection of fine art pieces that capture nature's beauty.</h2>
+            <a href="monochrome.html" class="cta-button fade-in">VISIT GALLERY</a>
+            <p class="hero-description fade-in">Meticulously crafted and printed directly on exceptional materials such as aluminum, glass, or the finest Hahnemühle paper, each piece tells its own story, offering a moment of reflection, wonder, and connection, designed to last 100 years.</p>
+        </div>
+        <div class="hero-gallery" id="heroGallery">
+            <!-- Populated by JavaScript -->
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 All rights reserved. Our creative works are protected by copyright laws and the delicate boundaries of human understanding.</p>
+    </footer>
+
+    <!-- JavaScript Files -->
+    <script src="assets/js/home.js"></script>
     
-    <!-- Gallery Grid (populated by JavaScript) -->
-    <div class="gallery-grid"></div>
-    
-    <!-- Image Counter -->
-    <div class="image-counter">Loading...</div>
-    
-  </div>
-  
-  <!-- JavaScript Files -->
-  <script src="assets/js/gallery.js"></script>
-  <script src="assets/js/lightbox.js"></script>
-  
 </body>
 </html>
