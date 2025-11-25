@@ -5,11 +5,11 @@
 @import 'variables.css';
 
 /* Container */
+/* Alignment: Matches navigation and footer horizontal padding (--space-xl = 96px) */
 .gallery-container {
   max-width: var(--container-max);
   margin: 0 auto;
-  padding: var(--container-padding);
-}
+  padding: var(--space-xl) var(--space-xl);}
 
 /* Gallery Header */
 .gallery-header {
