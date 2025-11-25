@@ -80,11 +80,22 @@ class Gallery {
 
   // Render gallery grid
   renderGallery() {
-    if (this.images.length === 0) {
-      this.gridContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No images found. Add images to /images/large/ and /images/thumbnails/ folders.</p>';
+    if (this.i    if (this.images.length === 0) {
+      this.gridContainer.innerHTML = `
+        <div style="text-align: center; padding: var(--space-2xl) var(--space-md);">
+          <div style="font-size: 64px; margin-bottom: var(--space-md); opacity: 0.3;">📸</div>
+          <h2 style="font-size: var(--font-size-lg); font-weight: 500; margin-bottom: var(--space-sm); color: var(--text-primary);">No images yet</h2>
+          <p style="color: var(--text-secondary); font-size: var(--font-size-base); max-width: 400px; margin: 0 auto var(--space-lg);">
+            Add your photos to get started. Export from Lightroom to <code style="background: var(--bg-secondary); padding: 2px 6px; border-radius: 3px; font-size: 0.9em;">/images/large/</code> and <code style="background: var(--bg-secondary); padding: 2px 6px; border-radius: 3px; font-size: 0.9em;">/images/thumbnails/</code>
+          </p>
+        </div>
+      `;
+      
+      // Hide the counter when empty
+      const counter = document.querySelector('.image-counter');
+      if (counter) counter.style.display = 'none';
       return;
     }
-
     this.images.forEach((img, index) => {
       const item = document.createElement('div');
       item.className = 'gallery-item loading';
