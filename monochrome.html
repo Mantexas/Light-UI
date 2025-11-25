@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monochrome Gallery - Gediminaš Zdancius</title>
+    <meta name="description" content="Black and white fine art photography collection by Gediminaš Zdancius.">
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="assets/css/variables.css">
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/navigation.css">
+    <link rel="stylesheet" href="assets/css/gallery.css">
+    <link rel="stylesheet" href="assets/css/lightbox.css">
+    <link rel="stylesheet" href="assets/css/animations.css">
+</head>
+<body>
+    
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <h1>Fine Art<br>Collection</h1>
+                <p class="logo-subtitle">Gediminaš Zdancius</p>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="store.html">STORE</a></li>
+                <li><a href="color.html">COLOR</a></li>
+                <li><a href="monochrome.html" class="active">MONOCHROME</a></li>
+                <li><a href="artist.html">THE ARTIST</a></li>
+                <li><a href="stories.html">STORIES & SOUND</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Gallery Container -->
+    <div class="gallery-container">
+        
+        <!-- Gallery Header -->
+        <header class="gallery-header">
+            <h1 class="gallery-title">Monochrome Gallery</h1>
+            <p class="gallery-description">Black and white fine art photography</p>
+        </header>
+
+        <!-- Gallery Grid -->
+        <div class="gallery-grid"></div>
+
+        <!-- Image Counter -->
+        <div class="image-counter">Loading...</div>
+
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" aria-label="Close lightbox">&times;</button>
+        <button class="lightbox-prev" aria-label="Previous image">‹</button>
+        <button class="lightbox-next" aria-label="Next image">›</button>
+        <div class="lightbox-content">
+            <img src="" alt="" id="lightbox-image">
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 All rights reserved. Our creative works are protected by copyright laws and the delicate boundaries of human understanding.</p>
+    </footer>
+
+    <!-- JavaScript Files -->
+    <script src="assets/js/gallery.js"></script>
+    <script src="assets/js/lightbox.js"></script>
+    
+</body>
+</html>
