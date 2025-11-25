@@ -114,6 +114,7 @@ class Lightbox {
     
     // Load image
     const largeSrc = item.dataset.large;
+        console.log('Lightbox - largeSrc:', largeSrc);
     this.image.src = largeSrc;
     
     // Update counter
