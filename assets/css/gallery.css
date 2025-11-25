@@ -54,6 +54,18 @@
   transition: opacity var(--transition-base), transform var(--transition-base);
 }
 
+/* Hide alt text and style broken images */
+.gallery-item img[alt]::before {
+  content: '';
+  display: none;
+}
+
+.gallery-item img[alt] {
+  font-size: 0;
+  color: transparent;
+  text-indent: -9999px;
+}
+
 /* Hover State */
 .gallery-item:hover {
   transform: scale(1.02);
