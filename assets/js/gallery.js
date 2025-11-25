@@ -39,7 +39,8 @@ class Gallery {
           return imageExtensions.includes(ext);
         })
         .map(file => ({
-          thumb: `images/large/${file.name}`,          large: `images/large/${file.name}`
+          thumb: `images/large/${file.name}`,
+          large: `images/large/${file.name}`
         }));
       
       console.log(`Found ${this.images.length} images`);
