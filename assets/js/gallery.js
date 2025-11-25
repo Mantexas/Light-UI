@@ -39,8 +39,7 @@ class Gallery {
           return imageExtensions.includes(ext);
         })
         .map(file => ({
-          thumb: `images/thumbnails/${file.name}`,
-          large: `images/large/${file.name}`
+          thumb: `images/large/${file.name}`,          large: `images/large/${file.name}`
         }));
       
       console.log(`Found ${this.images.length} images`);
@@ -62,7 +61,7 @@ class Gallery {
           <h2 style="font-size: var(--font-xl); margin-bottom: var(--space-sm); color: var(--color-text-primary);">No images yet</h2>
           <p style="color: var(--color-text-secondary); max-width: 500px; margin: 0 auto;">
             Add images to <code style="background: var(--color-bg-secondary); padding: 2px 8px; border-radius: 4px; font-size: 14px;">/images/large/</code> and 
-            <code style="background: var(--color-bg-secondary); padding: 2px 8px; border-radius: 4px; font-size: 14px;">/images/thumbnails/</code> folders.
+            <code style="background: var(--color-bg-secondary); padding: 2px 8px; border-radius: 4px; font-size: 14px;">/images/large/</code> folder.
           </p>
         </div>
       `;
