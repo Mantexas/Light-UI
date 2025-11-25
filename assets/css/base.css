@@ -1,3 +1,6 @@
+/* Google Fonts - Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
 /* ============================================
    Base Styles & Typography
    ============================================ */
@@ -20,8 +23,7 @@ html {
 body {
   margin: 0;
   padding: 0;
-  font-family: var(--font-sans);
-  font-size: var(--font-size-base);
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;  font-size: var(--font-size-base);
   line-height: var(--line-height);
   letter-spacing: var(--letter-spacing);
   color: var(--text-primary);
