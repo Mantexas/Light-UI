@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store - Gediminaš Zdancius Fine Art</title>
+    <meta name="description" content="Order fine art prints printed on exceptional materials.
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="assets/css/variables.css">
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/navigation.css">
+    <link rel="stylesheet" href="assets/css/gallery.css">
+    <link rel="stylesheet" href="assets/css/lightbox.css">
+    <link rel="stylesheet" href="assets/css/animations.css">
+    <link rel="stylesheet" href="assets/css/home.css">
+    <style>
+        .store-container {
+            max-width: var(--container-max-width);
+            margin: 0 auto;
+            padding: var(--space-2xl) var(--space-xl);
+        }
+        
+        .store-intro {
+            text-align: center;
+            margin-bottom: var(--space-2xl);
+        }
+        
+        .store-intro h1 {
+            font-size: var(--font-size-xl);
+            margin-bottom: var(--space-md);
+        }
+        
+        .store-intro p {
+            font-size: var(--font-size-md);
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: var(--line-height-relaxed);
+        }
+        
+        .store-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            margin-bottom: var(--space-2xl);
+        }
+        
+        .store-item {
+            cursor: pointer;
+            transition: transform var(--transition-normal);
+        }
+        
+        .store-item:hover {
+            transform: scale(1.02);
+        }
+        
+        .store-item img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        
+        .store-item-title {
+            margin-top: var(--space-sm);
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+        }
+        
+        .order-form {
+            max-width: 600px;
+            margin: var(--space-2xl) auto;
+            padding: var(--space-xl);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+        
+        .form-group {
+            margin-bottom: var(--space-lg);
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: var(--space-xs);
+            font-weight: var(--font-weight-medium);
+            font-size: var(--font-size-sm);
+        }
+        
+        .form-group select,
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: var(--space-md);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: var(--font-size-sm);
+            font-family: inherit;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .order-button {
+            width: 100%;
+            padding: var(--space-md) var(--space-xl);
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            border: 2px solid var(--text-primary);
+            border-radius: 4px;
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+        
+        .order-button:hover {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        
+        @media (max-width: 768px) {
+            .store-gallery {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <h1>Fine Art<br>Collection</h1>
+                <p class="logo-subtitle">Gediminaš Zdancius</p>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="store.html" class="active">STORE</a></li>
+                <li><a href="color.html">COLOR</a></li>
+                <li><a href="monochrome.html">MONOCHROME</a></li>
+                <li><a href="artist.html">THE ARTIST</a></li>
+                <li><a href="stories.html">STORIES & SOUND</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="store-container">
+        
+        <div class="store-intro fade-in">
+            <h1>Fine Art Prints Store</h1>
+            <p>Selected artwork can be printed directly on exceptional materials such as aluminum, glass, or the finest Hahnemühle paper. Each piece is meticulously crafted, offering a moment of reflection, wonder, and connection, designed to last 100 years.</p>
+        </div>
+
+        <div class="store-gallery" id="storeGallery">
+            <!-- Populated by JavaScript -->
+        </div>
+        
+        <div class="order-form" id="orderForm" style="display: none;">
+            <h2 style="margin-bottom: var(--space-lg); font-size: var(--font-size-lg);">Request a Quote</h2>
+            
+            <div class="form-group">
+                <label for="selectedImage">Selected Artwork</label>
+                <input type="text" id="selectedImage" readonly>
+            </div>
+            
+            <div class="form-group">
+                <label for="printSize">Print Size *</label>
+                <select id="printSize" required>
+                    <option value="">Select a size</option>
+                    <option value="24x36">24" x 36"</option>
+                    <option value="36x48">36" x 48"</option>
+                    <option value="40x60">40" x 60"</option>
+                    <option value="custom">Custom Size</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="printMaterial">Print Material *</label>
+                <select id="printMaterial" required>
+                    <option value="">Select a material</option>
+                    <option value="aluminum">Aluminum</option>
+                    <option value="glass">Glass</option>
+                    <option value="hahnemuhle">Hahnemühle Fine Art Paper</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="customerName">Your Name *</label>
+                <input type="text" id="customerName" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="customerEmail">Your Email *</label>
+                <input type="email" id="customerEmail" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="additionalNotes">Additional Notes</label>
+                <textarea id="additionalNotes" placeholder="Any special requests or questions..."></textarea>
+            </div>
+            
+            <button class="order-button" onclick="sendOrderEmail()">Request Quote via Email</button>
+        </div>
+        
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" aria-label="Close lightbox">&times;</button>
+        <button class="lightbox-prev" aria-label="Previous image">‹</button>
+        <button class="lightbox-next" aria-label="Next image">›</button>
+        <div class="lightbox-content">
+            <img src="" alt="" id="lightbox-image">
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 All rights reserved. Our creative works are protected by copyright laws and the delicate boundaries of human understanding.</p>
+    </footer>
+
+    <script>
+    // Load store gallery
+    async function loadStoreGallery() {
+        const storeGallery = document.getElementById('storeGallery');
+        
+        try {
+            const apiUrl = 'https://api.github.com/repos/Mantexas/Light-UI/contents/images/large';
+            const response = await fetch(apiUrl);
+            const files = await response.json();
+            
+            const imageFiles = files.filter(file => {
+                const ext = file.name.split('.').pop().toLowerCase();
+                return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
+            });
+            
+            imageFiles.forEach(file => {
+                const item = document.createElement('div');
+                item.className = 'store-item';
+                item.innerHTML = `
+                    <img src="images/large/${file.name}" alt="${file.name}" loading="lazy">
+                    <p class="store-item-title">${file.name.replace(/\.[^/.]+$/, '').replace(/_/g, ' ')}</p>
+                `;
+                item.addEventListener('click', () => selectArtwork(file.name));
+                storeGallery.appendChild(item);
+            });
+            
+        } catch (error) {
+            console.error('Error loading store gallery:', error);
+        }
+    }
+    
+    // Select artwork for order
+    function selectArtwork(filename) {
+        document.getElementById('selectedImage').value = filename;
+        document.getElementById('orderForm').style.display = 'block';
+        document.getElementById('orderForm').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Send order email
+    function sendOrderEmail() {
+        const artwork = document.getElementById('selectedImage').value;
+        const size = document.getElementById('printSize').value;
+        const material = document.getElementById('printMaterial').value;
+        const name = document.getElementById('customerName').value;
+        const email = document.getElementById('customerEmail').value;
+        const notes = document.getElementById('additionalNotes').value;
+        
+        if (!artwork || !size || !material || !name || !email) {
+            alert('Please fill in all required fields');
+            return;
+        }
+        
+        const subject = encodeURIComponent('Fine Art Print Quote Request');
+        const body = encodeURIComponent(`Hello,\n\nI would like to request a quote for a fine art print:\n\nArtwork: ${artwork}\nSize: ${size}\nMaterial: ${material}\n\nCustomer Information:\nName: ${name}\nEmail: ${email}\n\nAdditional Notes:\n${notes || 'None'}\n\nThank you!`);
+        
+        window.location.href = `mailto:hello@zdancius.com?subject=${subject}&body=${body}`;
+    }
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', loadStoreGallery);
+    </script>
+    
+</body>
+</html>
