@@ -55,17 +55,12 @@ class Gallery {
   renderGallery() {
     if (this.images.length === 0) {
       // Enhanced empty state
-      this.gridContainer.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: var(--space-2xl) 0;">
-          <div style="font-size: 64px; opacity: 0.3; margin-bottom: var(--space-md);">📸</div>
-          <h2 style="font-size: var(--font-xl); margin-bottom: var(--space-sm); color: var(--color-text-primary);">No images yet</h2>
-          <p style="color: var(--color-text-secondary); max-width: 500px; margin: 0 auto;">
-            Add images to <code style="background: var(--color-bg-secondary); padding: 2px 8px; border-radius: 4px; font-size: 14px;">/images/large/</code> and 
-            <code style="background: var(--color-bg-secondary); padding: 2px 8px; border-radius: 4px; font-size: 14px;">/images/large/</code> folder.
-          </p>
-        </div>
-      `;
-      // Hide the counter when empty
+                  this.gridContainer.innerHTML = `
+                <div style="text-align: center; padding: var(--space-2xl); grid-column: 1 / -1;">
+                    <h2 style="font-size: var(--font-size-xl); margin-bottom: var(--space-md); font-weight: var(--font-weight-normal);">🎨 Gallery is being updated</h2>
+                    <p style="color: var(--text-secondary); font-size: var(--font-size-md);">This page is currently being curated with new artwork. Check back soon!</p>
+                </div>
+            `;// Hide the counter when empty
       const counter = document.querySelector('.image-counter');
       if (counter) counter.style.display = 'none';
       return;
