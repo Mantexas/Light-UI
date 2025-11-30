@@ -36,18 +36,28 @@
 
     <!-- Gallery Container -->
     <div class="gallery-container">
-        
+
         <!-- Gallery Header -->
         <header class="gallery-header">
             <h1 class="gallery-title">Gallery</h1>
-            <p class="gallery-description">Fine art photography collection</p>
+            <p class="gallery-description">Explore curated collections</p>
         </header>
 
-        <!-- Gallery Grid -->
-        <div class="gallery-grid"></div>
+        <!-- Collections Grid (Hub View) -->
+        <div id="collectionsView" class="collections-grid">
+            <p class="loading">Loading collections...</p>
+        </div>
 
-        <!-- Image Counter -->
-        <div class="image-counter">Loading...</div>
+        <!-- Collection Images Grid (Detail View) -->
+        <div id="collectionView" class="gallery-view" style="display: none;">
+            <div class="collection-header">
+                <button class="back-button" id="backBtn">← Back to Collections</button>
+                <h2 id="collectionTitle" class="collection-title"></h2>
+            </div>
+
+            <div class="gallery-grid"></div>
+            <div class="image-counter">Loading...</div>
+        </div>
 
     </div>
 
