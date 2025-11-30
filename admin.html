@@ -306,26 +306,108 @@
             <div id="galleryTab" class="admin-tab-content">
                 <h2>Gallery Management</h2>
 
-                <div class="upload-section">
-                    <h3>Upload Gallery Images</h3>
-                    <p class="upload-info">Supported formats: JPG, PNG, WebP</p>
-                    <div class="upload-area" id="galleryUploadArea">
-                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <rect x="3" y="3" width="18" height="18" rx="2"/>
-                            <circle cx="8.5" cy="8.5" r="1.5"/>
-                            <polyline points="21 15 16 10 5 21"/>
-                        </svg>
-                        <p>Drag and drop images here or click to browse</p>
-                        <input type="file" id="galleryInput" accept="image/*" multiple style="display: none;">
+                <div class="gallery-management-wrapper">
+                    <!-- Collections Sidebar -->
+                    <div class="gallery-sidebar">
+                        <div class="sidebar-header">
+                            <h3>Collections</h3>
+                            <button type="button" id="newCollectionBtn" class="btn-small btn-primary">+ New</button>
+                        </div>
+
+                        <!-- New Collection Form -->
+                        <div id="newCollectionForm" class="collection-form" style="display: none;">
+                            <input type="text" id="collectionNameInput" placeholder="Collection name" class="form-input-small">
+                            <div class="form-actions-small">
+                                <button type="button" id="createCollectionBtn" class="btn-small btn-primary">Create</button>
+                                <button type="button" id="cancelCollectionBtn" class="btn-small btn-secondary">Cancel</button>
+                            </div>
+                        </div>
+
+                        <!-- Collections List -->
+                        <div id="collectionsList" class="collections-list">
+                            <p class="loading">Loading collections...</p>
+                        </div>
+                    </div>
+
+                    <!-- Gallery Content -->
+                    <div class="gallery-content">
+                        <!-- No Collection Selected Message -->
+                        <div id="noCollectionSelected" class="gallery-empty-message" style="display: flex;">
+                            <p>Select a collection to manage images</p>
+                            <p class="text-secondary">Click a collection from the list to get started</p>
+                        </div>
+
+                        <!-- Collection Detail View -->
+                        <div id="collectionDetail" class="collection-detail" style="display: none;">
+                            <!-- Collection Header -->
+                            <div class="collection-header">
+                                <div class="collection-header-info">
+                                    <h3 id="selectedCollectionName"></h3>
+                                    <p id="collectionImageCount" class="text-secondary"></p>
+                                </div>
+                                <div class="collection-header-actions">
+                                    <button type="button" id="renameCollectionBtn" class="btn-small btn-secondary" title="Rename collection">✎ Rename</button>
+                                    <button type="button" id="deleteCollectionBtn" class="btn-small btn-danger" title="Delete collection">🗑 Delete</button>
+                                </div>
+                            </div>
+
+                            <!-- Rename Collection Form -->
+                            <div id="renameForm" class="collection-form" style="display: none;">
+                                <input type="text" id="renameInput" placeholder="New name" class="form-input-small">
+                                <div class="form-actions-small">
+                                    <button type="button" id="confirmRenameBtn" class="btn-small btn-primary">Rename</button>
+                                    <button type="button" id="cancelRenameBtn" class="btn-small btn-secondary">Cancel</button>
+                                </div>
+                            </div>
+
+                            <!-- Upload Images Section -->
+                            <div class="upload-section">
+                                <h4>Upload Images</h4>
+                                <div class="upload-area" id="galleryUploadArea">
+                                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                                        <polyline points="21 15 16 10 5 21"/>
+                                    </svg>
+                                    <p>Drag and drop images here or click to browse</p>
+                                    <p class="upload-formats">JPG, PNG, WebP, GIF</p>
+                                    <input type="file" id="galleryInput" accept="image/*" multiple style="display: none;">
+                                </div>
+                            </div>
+
+                            <!-- Sorting Controls -->
+                            <div class="gallery-controls">
+                                <div class="gallery-controls-left">
+                                    <label for="sortGallery" class="label-small">Sort by:</label>
+                                    <select id="sortGallery" class="form-select-small">
+                                        <option value="name">Name (A-Z)</option>
+                                        <option value="name-desc">Name (Z-A)</option>
+                                        <option value="date">Date Added (newest)</option>
+                                        <option value="date-old">Date Added (oldest)</option>
+                                        <option value="size">File Size</option>
+                                    </select>
+                                </div>
+                                <div class="gallery-controls-right">
+                                    <label class="checkbox-label-small">
+                                        <input type="checkbox" id="selectAllImages">
+                                        Select All
+                                    </label>
+                                    <button type="button" id="deleteSelectedBtn" class="btn-small btn-danger" style="display: none;">
+                                        Delete Selected
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Images Grid -->
+                            <div id="collectionImagesGrid" class="collection-images-grid">
+                                <p class="loading">Loading images...</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="file-list">
-                    <h3>Images in Gallery</h3>
-                    <div id="galleryList" class="file-grid">
-                        <p class="loading">Loading gallery...</p>
-                    </div>
-                </div>
+                <!-- Hidden file input -->
+                <input type="file" id="galleryBulkInput" accept="image/*" multiple style="display: none;">
             </div>
 
             <!-- Settings Tab -->

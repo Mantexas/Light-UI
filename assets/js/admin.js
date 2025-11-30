@@ -28,6 +28,7 @@ class AdminPanel {
       this.loadStats();
       this.setupAboutEditor();
       this.setupArticleEditor();
+      this.setupGalleryManagement();
       this.setupUploadHandlers();
     } else {
       this.showLogin();
@@ -723,6 +724,527 @@ class AdminPanel {
   getArticleById(id) {
     const articles = JSON.parse(localStorage.getItem('articles') || '[]');
     return articles.find(a => a.id === id);
+  }
+
+  // ==================== GALLERY MANAGEMENT ====================
+
+  setupGalleryManagement() {
+    // Initialize on first load
+    if (localStorage.getItem('galleries') === null) {
+      this.initializeSampleGalleries();
+    }
+
+    // Load initial gallery data
+    this.loadGalleries();
+
+    // Setup event listeners
+    const newCollectionBtn = document.getElementById('newCollectionBtn');
+    const createCollectionBtn = document.getElementById('createCollectionBtn');
+    const cancelCollectionBtn = document.getElementById('cancelCollectionBtn');
+    const galleryInput = document.getElementById('galleryInput');
+    const galleryUploadArea = document.getElementById('galleryUploadArea');
+    const sortGallery = document.getElementById('sortGallery');
+    const selectAllImages = document.getElementById('selectAllImages');
+    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+    const renameCollectionBtn = document.getElementById('renameCollectionBtn');
+    const confirmRenameBtn = document.getElementById('confirmRenameBtn');
+    const cancelRenameBtn = document.getElementById('cancelRenameBtn');
+    const deleteCollectionBtn = document.getElementById('deleteCollectionBtn');
+
+    if (newCollectionBtn) {
+      newCollectionBtn.addEventListener('click', () => this.showNewCollectionForm());
+    }
+    if (createCollectionBtn) {
+      createCollectionBtn.addEventListener('click', () => this.createCollection());
+    }
+    if (cancelCollectionBtn) {
+      cancelCollectionBtn.addEventListener('click', () => this.hideNewCollectionForm());
+    }
+
+    if (galleryUploadArea) {
+      galleryUploadArea.addEventListener('click', () => galleryInput?.click());
+      galleryUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        galleryUploadArea.classList.add('drag-over');
+      });
+      galleryUploadArea.addEventListener('dragleave', () => {
+        galleryUploadArea.classList.remove('drag-over');
+      });
+      galleryUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        galleryUploadArea.classList.remove('drag-over');
+        if (e.dataTransfer.files.length > 0) {
+          this.handleGalleryUpload(e.dataTransfer.files);
+        }
+      });
+    }
+
+    if (galleryInput) {
+      galleryInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          this.handleGalleryUpload(e.target.files);
+        }
+      });
+    }
+
+    if (sortGallery) {
+      sortGallery.addEventListener('change', () => this.renderCurrentCollectionImages());
+    }
+
+    if (selectAllImages) {
+      selectAllImages.addEventListener('change', (e) => {
+        document.querySelectorAll('.gallery-image-checkbox').forEach(checkbox => {
+          checkbox.checked = e.target.checked;
+        });
+        this.updateDeleteSelectedButton();
+      });
+    }
+
+    if (deleteSelectedBtn) {
+      deleteSelectedBtn.addEventListener('click', () => this.deleteSelectedImages());
+    }
+
+    if (renameCollectionBtn) {
+      renameCollectionBtn.addEventListener('click', () => this.showRenameForm());
+    }
+
+    if (confirmRenameBtn) {
+      confirmRenameBtn.addEventListener('click', () => this.confirmRenameCollection());
+    }
+
+    if (cancelRenameBtn) {
+      cancelRenameBtn.addEventListener('click', () => this.hideRenameForm());
+    }
+
+    if (deleteCollectionBtn) {
+      deleteCollectionBtn.addEventListener('click', () => this.deleteCurrentCollection());
+    }
+  }
+
+  loadGalleries() {
+    const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
+    this.currentCollection = null;
+    this.currentSortMethod = 'name';
+    this.renderCollectionsList(galleries);
+  }
+
+  renderCollectionsList(galleries) {
+    const collectionsList = document.getElementById('collectionsList');
+    const collectionNames = Object.keys(galleries).sort();
+
+    if (collectionNames.length === 0) {
+      collectionsList.innerHTML = '<p class="loading">No collections yet. Create one to get started!</p>';
+      return;
+    }
+
+    collectionsList.innerHTML = collectionNames.map(name => `
+      <div class="collection-item" data-collection="${name}">
+        <span class="collection-item-name">${this.escapeHtml(name)}</span>
+        <span class="collection-item-count">${galleries[name].length}</span>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('.collection-item').forEach(item => {
+      item.addEventListener('click', () => {
+        this.selectCollection(item.dataset.collection);
+      });
+    });
+  }
+
+  selectCollection(name) {
+    const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
+
+    if (!galleries[name]) return;
+
+    this.currentCollection = name;
+    this.currentSortMethod = 'name';
+
+    // Update active state
+    document.querySelectorAll('.collection-item').forEach(item => {
+      item.classList.toggle('active', item.dataset.collection === name);
+    });
+
+    // Show collection detail
+    const noCollection = document.getElementById('noCollectionSelected');
+    const collectionDetail = document.getElementById('collectionDetail');
+    if (noCollection) noCollection.style.display = 'none';
+    if (collectionDetail) collectionDetail.style.display = 'block';
+
+    // Update header
+    const collectionName = document.getElementById('selectedCollectionName');
+    const imageCount = document.getElementById('collectionImageCount');
+    if (collectionName) collectionName.textContent = name;
+    if (imageCount) imageCount.textContent = `${galleries[name].length} images`;
+
+    // Reset form
+    const renameForm = document.getElementById('renameForm');
+    if (renameForm) renameForm.style.display = 'none';
+
+    const sortGallery = document.getElementById('sortGallery');
+    if (sortGallery) sortGallery.value = 'name';
+
+    // Render images
+    this.renderCurrentCollectionImages();
+  }
+
+  showNewCollectionForm() {
+    const form = document.getElementById('newCollectionForm');
+    const input = document.getElementById('collectionNameInput');
+    if (form) {
+      form.style.display = 'block';
+      if (input) input.focus();
+    }
+  }
+
+  hideNewCollectionForm() {
+    const form = document.getElementById('newCollectionForm');
+    const input = document.getElementById('collectionNameInput');
+    if (form) form.style.display = 'none';
+    if (input) input.value = '';
+  }
+
+  createCollection() {
+    const input = document.getElementById('collectionNameInput');
+    const name = input?.value.trim();
+
+    if (!name) {
+      this.showNotification('Please enter a collection name', 'error');
+      return;
+    }
+
+    const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
+
+    if (galleries[name]) {
+      this.showNotification('Collection already exists', 'error');
+      return;
+    }
+
+    galleries[name] = [];
+    localStorage.setItem('galleries', JSON.stringify(galleries));
+    this.showNotification('Collection created!');
+    this.hideNewCollectionForm();
+    this.loadGalleries();
+    this.selectCollection(name);
+  }
+
+  showRenameForm() {
+    const form = document.getElementById('renameForm');
+    const input = document.getElementById('renameInput');
+    if (form) {
+      form.style.display = 'block';
+      if (input) {
+        input.value = this.currentCollection;
+        input.focus();
+        input.select();
+      }
+    }
+  }
+
+  hideRenameForm() {
+    const form = document.getElementById('renameForm');
+    if (form) form.style.display = 'none';
+  }
+
+  confirmRenameCollection() {
+    const input = document.getElementById('renameInput');
+    const newName = input?.value.trim();
+
+    if (!newName || newName === this.currentCollection) {
+      this.hideRenameForm();
+      return;
+    }
+
+    const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
+
+    if (galleries[newName]) {
+      this.showNotification('Collection name already exists', 'error');
+      return;
+    }
+
+    galleries[newName] = galleries[this.currentCollection];
+    delete galleries[this.currentCollection];
+    localStorage.setItem('galleries', JSON.stringify(galleries));
+
+    this.showNotification('Collection renamed!');
+    this.hideRenameForm();
+    this.loadGalleries();
+    this.selectCollection(newName);
+  }
+
+  deleteCurrentCollection() {
+    if (!this.currentCollection) return;
+
+    if (!confirm(`Delete "${this.currentCollection}" and all its images? This cannot be undone.`)) {
+      return;
+    }
+
+    const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
+    delete galleries[this.currentCollection];
+    localStorage.setItem('galleries', JSON.stringify(galleries));
+
+    this.showNotification('Collection deleted!');
+    this.currentCollection = null;
+    this.loadGalleries();
+
+    const noCollection = document.getElementById('noCollectionSelected');
+    const collectionDetail = document.getElementById('collectionDetail');
+    if (noCollection) noCollection.style.display = 'flex';
+    if (collectionDetail) collectionDetail.style.display = 'none';
+  }
+
+  handleGalleryUpload(files) {
+    if (!this.currentCollection) {
+      this.showNotification('Please select a collection first', 'error');
+      return;
+    }
+
+    const imageFiles = Array.from(files).filter(f => this.isImageFile(f.name));
+
+    if (imageFiles.length === 0) {
+      this.showNotification('No image files selected', 'error');
+      return;
+    }
+
+    let loaded = 0;
+
+    imageFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.uploadImageToCollection(file.name, e.target.result);
+        loaded++;
+        if (loaded === imageFiles.length) {
+          this.showNotification(`Uploaded ${imageFiles.length} image(s)`);
+          this.renderCurrentCollectionImages();
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  uploadImageToCollection(filename, imageData) {
+    const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
+
+    if (!galleries[this.currentCollection]) {
+      galleries[this.currentCollection] = [];
+    }
+
+    galleries[this.currentCollection].push({
+      id: Date.now() + Math.random(),
+      name: filename,
+      data: imageData,
+      size: Math.round(imageData.length),
+      dateAdded: new Date().toISOString()
+    });
+
+    localStorage.setItem('galleries', JSON.stringify(galleries));
+  }
+
+  renderCurrentCollectionImages() {
+    if (!this.currentCollection) return;
+
+    const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
+    const images = galleries[this.currentCollection] || [];
+
+    let sortedImages = [...images];
+    const sortMethod = document.getElementById('sortGallery')?.value || 'name';
+
+    switch (sortMethod) {
+      case 'name':
+        sortedImages.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'name-desc':
+        sortedImages.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      case 'date':
+        sortedImages.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+        break;
+      case 'date-old':
+        sortedImages.sort((a, b) => new Date(a.dateAdded) - new Date(b.dateAdded));
+        break;
+      case 'size':
+        sortedImages.sort((a, b) => b.size - a.size);
+        break;
+    }
+
+    const grid = document.getElementById('collectionImagesGrid');
+    if (!grid) return;
+
+    if (images.length === 0) {
+      grid.innerHTML = '<p class="loading" style="grid-column: 1/-1;">No images yet. Upload some to get started!</p>';
+      return;
+    }
+
+    grid.innerHTML = sortedImages.map(image => `
+      <div class="gallery-image-item" data-image-id="${image.id}">
+        <img src="${image.data}" alt="${image.name}">
+        <input type="checkbox" class="gallery-image-checkbox" data-image-id="${image.id}">
+        <div class="gallery-image-info">
+          <div class="gallery-image-name">${this.escapeHtml(image.name)}</div>
+          <div style="font-size: 10px; margin-top: 4px;">${this.formatFileSize(image.size)}</div>
+        </div>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('.gallery-image-checkbox').forEach(checkbox => {
+      checkbox.addEventListener('change', () => this.updateDeleteSelectedButton());
+    });
+
+    document.querySelectorAll('.gallery-image-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('gallery-image-checkbox')) {
+          const checkbox = item.querySelector('.gallery-image-checkbox');
+          checkbox.checked = !checkbox.checked;
+          this.updateDeleteSelectedButton();
+        }
+      });
+    });
+  }
+
+  updateDeleteSelectedButton() {
+    const selectedCount = document.querySelectorAll('.gallery-image-checkbox:checked').length;
+    const deleteBtn = document.getElementById('deleteSelectedBtn');
+    if (deleteBtn) {
+      deleteBtn.style.display = selectedCount > 0 ? 'block' : 'none';
+      deleteBtn.textContent = `Delete Selected (${selectedCount})`;
+    }
+  }
+
+  deleteSelectedImages() {
+    const selectedIds = Array.from(document.querySelectorAll('.gallery-image-checkbox:checked'))
+      .map(cb => cb.dataset.imageId);
+
+    if (selectedIds.length === 0) return;
+
+    if (!confirm(`Delete ${selectedIds.length} image(s)? This cannot be undone.`)) {
+      return;
+    }
+
+    const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
+    galleries[this.currentCollection] = galleries[this.currentCollection].filter(
+      img => !selectedIds.includes(img.id.toString())
+    );
+
+    localStorage.setItem('galleries', JSON.stringify(galleries));
+    this.showNotification(`Deleted ${selectedIds.length} image(s)`);
+    this.renderCurrentCollectionImages();
+
+    const selectAll = document.getElementById('selectAllImages');
+    if (selectAll) selectAll.checked = false;
+  }
+
+  deleteImage(imageId) {
+    if (!confirm('Delete this image? This cannot be undone.')) {
+      return;
+    }
+
+    const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
+    galleries[this.currentCollection] = galleries[this.currentCollection].filter(
+      img => img.id !== imageId
+    );
+
+    localStorage.setItem('galleries', JSON.stringify(galleries));
+    this.showNotification('Image deleted');
+    this.renderCurrentCollectionImages();
+  }
+
+  initializeSampleGalleries() {
+    // Create sample galleries with demo images
+    const sampleGalleries = {
+      'Vilnius': [
+        {
+          id: 1,
+          name: 'vilnius-cathedral.jpg',
+          data: this.generateSampleImage('#1a1a1a', 'Vilnius\nCathedral'),
+          size: 245000,
+          dateAdded: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: 2,
+          name: 'vilnius-street.jpg',
+          data: this.generateSampleImage('#2d2d2d', 'Street\nLife'),
+          size: 189000,
+          dateAdded: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: 3,
+          name: 'vilnius-sunset.jpg',
+          data: this.generateSampleImage('#4a4a4a', 'Golden\nHour'),
+          size: 312000,
+          dateAdded: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+        }
+      ],
+      'Landscapes': [
+        {
+          id: 4,
+          name: 'mountain-peaks.jpg',
+          data: this.generateSampleImage('#3d5a3d', 'Mountain\nPeaks'),
+          size: 267000,
+          dateAdded: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: 5,
+          name: 'forest-dawn.jpg',
+          data: this.generateSampleImage('#1a3a1a', 'Forest\nDawn'),
+          size: 198000,
+          dateAdded: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: 6,
+          name: 'coastal-view.jpg',
+          data: this.generateSampleImage('#1a3a5a', 'Coastal\nView'),
+          size: 289000,
+          dateAdded: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+        }
+      ],
+      'Portrait': [
+        {
+          id: 7,
+          name: 'studio-portrait.jpg',
+          data: this.generateSampleImage('#5a5a3d', 'Studio\nPortrait'),
+          size: 156000,
+          dateAdded: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: 8,
+          name: 'natural-light.jpg',
+          data: this.generateSampleImage('#5a4a2d', 'Natural\nLight'),
+          size: 203000,
+          dateAdded: new Date().toISOString()
+        }
+      ]
+    };
+
+    localStorage.setItem('galleries', JSON.stringify(sampleGalleries));
+  }
+
+  generateSampleImage(bgColor, text) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 400;
+    canvas.height = 300;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, 400, 300);
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    for (let i = 0; i < 5; i++) {
+      ctx.fillRect(Math.random() * 400, Math.random() * 300, Math.random() * 100, Math.random() * 100);
+    }
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.font = 'bold 24px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    const lines = text.split('\n');
+    const lineHeight = 30;
+    const startY = 150 - (lines.length * lineHeight) / 2;
+
+    lines.forEach((line, i) => {
+      ctx.fillText(line, 200, startY + i * lineHeight);
+    });
+
+    return canvas.toDataURL('image/jpeg', 0.9);
   }
 
   // ==================== VIDEO MANAGEMENT ====================
