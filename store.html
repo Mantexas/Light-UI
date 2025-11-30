@@ -120,17 +120,22 @@
     // Load store gallery
     async function loadStoreGallery() {
         const storeGallery = document.getElementById('storeGallery');
-        
+
         try {
             const apiUrl = 'https://api.github.com/repos/Mantexas/Light-UI/contents/images/large';
             const response = await fetch(apiUrl);
             const files = await response.json();
-            
+
             const imageFiles = files.filter(file => {
                 const ext = file.name.split('.').pop().toLowerCase();
                 return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
             });
-            
+
+            if (imageFiles.length === 0) {
+                showEmptyState();
+                return;
+            }
+
             imageFiles.forEach(file => {
                 const item = document.createElement('div');
                 item.className = 'store-item';
@@ -141,10 +146,21 @@
                 item.addEventListener('click', () => selectArtwork(file.name));
                 storeGallery.appendChild(item);
             });
-            
+
         } catch (error) {
             console.error('Error loading store gallery:', error);
+            showEmptyState();
         }
+    }
+
+    function showEmptyState() {
+        const storeGallery = document.getElementById('storeGallery');
+        storeGallery.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 96px 32px; min-height: 400px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                <p style="font-size: var(--font-size-lg); color: var(--text-secondary); margin: 0 0 16px 0; max-width: 500px;">Coming Soon</p>
+                <p style="font-size: var(--font-size-sm); color: var(--text-secondary); font-weight: 300; max-width: 500px; line-height: 1.65; margin: 0;">We're carefully curating a selection of fine art prints. Check back soon to order exceptional artwork on premium materials.</p>
+            </div>
+        `;
     }
     
     // Select artwork for order

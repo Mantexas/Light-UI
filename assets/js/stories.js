@@ -28,7 +28,11 @@ class StoriesPage {
 
     if (this.articles.length === 0) {
       this.storiesGrid.style.display = 'none';
-      this.emptyState.style.display = 'block';
+      this.emptyState.style.display = 'flex';
+      this.emptyState.innerHTML = `
+        <p>Coming Soon</p>
+        <p style="font-size: var(--font-size-sm); color: var(--text-secondary); font-weight: var(--font-weight-light); max-width: 500px; line-height: var(--line-height-relaxed);">We're crafting thoughtful stories about photography, creative process, and art. Check back soon for our first article.</p>
+      `;
       return;
     }
 

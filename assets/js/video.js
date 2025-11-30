@@ -35,7 +35,7 @@ class VideoGallery {
       if (!response.ok) {
         // If videos folder doesn't exist, show message
         if (response.status === 404) {
-          this.imageCounter.textContent = 'No videos found. Create images/videos/large/ folder and add video files.';
+          this.showEmptyState();
           return;
         }
         throw new Error(`API error: ${response.status}`);
@@ -50,7 +50,7 @@ class VideoGallery {
       });
 
       if (videoFiles.length === 0) {
-        this.imageCounter.textContent = 'No video files found in images/videos/large/';
+        this.showEmptyState();
         return;
       }
 
@@ -69,8 +69,21 @@ class VideoGallery {
       this.updateVideoCount();
     } catch (error) {
       console.error('Error loading videos:', error);
-      this.imageCounter.textContent = 'Error loading videos. Please check console.';
+      this.showEmptyState();
     }
+  }
+
+  /**
+   * Show empty state
+   */
+  showEmptyState() {
+    this.videoGrid.innerHTML = `
+      <div class="video-empty-state" style="grid-column: 1 / -1;">
+        <p>Coming Soon</p>
+        <p class="video-empty-state-subtitle">We're currently working on building our film collection. Check back soon to explore cinematic visual essays.</p>
+      </div>
+    `;
+    this.imageCounter.textContent = 'No videos available yet';
   }
 
   /**

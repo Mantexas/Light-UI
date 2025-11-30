@@ -345,10 +345,10 @@ class GalleryCollections {
    */
   showEmpty() {
     this.collectionsView.innerHTML = `
-      <p class="loading">No collections found.</p>
-      <p style="text-align: center; color: var(--text-secondary); font-size: var(--font-size-sm);">
-        Create a folder in <code>images/gallery/Vilnius</code> and add images. Refresh to see it here.
-      </p>
+      <div class="gallery-empty-state">
+        <p>Coming Soon</p>
+        <p class="gallery-empty-state-subtitle">We're currently working on building our gallery collection. Check back soon to explore curated photographs and visual art.</p>
+      </div>
     `;
   }
 
