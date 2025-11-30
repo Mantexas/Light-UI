@@ -73,6 +73,7 @@
             <!-- Navigation Tabs -->
             <div class="admin-tabs">
                 <button class="admin-tab-btn active" data-tab="dashboard">Dashboard</button>
+                <button class="admin-tab-btn" data-tab="about">About</button>
                 <button class="admin-tab-btn" data-tab="articles">Articles</button>
                 <button class="admin-tab-btn" data-tab="videos">Videos</button>
                 <button class="admin-tab-btn" data-tab="gallery">Gallery</button>
@@ -109,6 +110,49 @@
                         <li><strong>Thumbnails folder:</strong> <code>images/thumbnails/</code></li>
                         <li><strong>Repository:</strong> Mantexas/Light-UI</li>
                     </ul>
+                </div>
+            </div>
+
+            <!-- About Tab -->
+            <div id="aboutTab" class="admin-tab-content">
+                <h2>About Page Management</h2>
+
+                <div class="article-editor-section">
+                    <h3>Edit About Content</h3>
+
+                    <form id="aboutForm" class="article-form">
+                        <div class="form-group">
+                            <label for="aboutTextMain">Main Text (Left Column) *</label>
+                            <textarea id="aboutTextMain" name="textMain" rows="10" required placeholder="Enter main about text. Supports Markdown formatting."></textarea>
+                            <p class="form-hint">Supports: **bold**, *italic*, # Headers, > Quotes, `code`, [links](url)</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="aboutImageUrl">Image URL (Right Column) *</label>
+                            <input type="url" id="aboutImageUrl" name="imageUrl" required placeholder="https://example.com/image.jpg">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="aboutImageName">Image Alt Text</label>
+                            <input type="text" id="aboutImageName" name="imageName" placeholder="Image description">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="aboutTextBottom">Bottom Text (Full Width) *</label>
+                            <textarea id="aboutTextBottom" name="textBottom" rows="10" required placeholder="Enter extended about text. Supports Markdown formatting."></textarea>
+                            <p class="form-hint">Supports: **bold**, *italic*, # Headers, > Quotes, `code`, [links](url)</p>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" id="aboutSubmitBtn" class="btn-primary">Save About Content</button>
+                            <button type="reset" id="aboutResetBtn" class="btn-secondary">Clear Form</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="articles-list">
+                    <h3>Preview</h3>
+                    <p style="color: var(--text-secondary); font-weight: var(--font-weight-light);">Visit the <a href="artist.html" target="_blank" style="color: var(--accent);">About page</a> to see your changes live.</p>
                 </div>
             </div>
 

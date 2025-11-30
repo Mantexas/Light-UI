@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Gediminaš Zdancius</title>
+    <meta name="description" content="Learn about Gediminaš Zdancius and his approach to fine art photography.">
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="assets/css/variables.css">
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/navigation.css">
+    <link rel="stylesheet" href="assets/css/artist.css">
+    <link rel="stylesheet" href="assets/css/animations.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <h1>Fine Art<br>Collection</h1>
+                <p class="logo-subtitle">Gediminaš Zdancius</p>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="store.html">STORE</a></li>
+                <li><a href="color.html">GALLERY</a></li>
+                <li><a href="film.html">FILM</a></li>
+                <li><a href="artist.html" class="active">ABOUT</a></li>
+                <li><a href="stories.html">STORIES</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- About Container -->
+    <div class="about-container">
+
+        <!-- Header -->
+        <header class="about-header">
+            <h1>About</h1>
+        </header>
+
+        <!-- Main Section: Text + Image -->
+        <section class="about-main">
+            <div class="about-text-section">
+                <div id="aboutTextMain" class="about-text-content">
+                    <p>Loading...</p>
+                </div>
+            </div>
+            <div class="about-image-section">
+                <img id="aboutImage" src="" alt="Artist" class="about-image">
+            </div>
+        </section>
+
+        <!-- Bottom Section: Extended Text -->
+        <section class="about-bottom">
+            <div id="aboutTextBottom" class="about-text-extended">
+                <p>Loading...</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer style="cursor: pointer;" title="Shift+Click for admin">
+        <p>&copy; 2024 All rights reserved. Our creative works are protected by copyright laws and the delicate boundaries of human understanding.</p>
+    </footer>
+
+    <!-- JavaScript Files -->
+    <script src="assets/js/artist.js"></script>
+    <script>
+        document.querySelector('footer').addEventListener('click', function(e) {
+            if (e.shiftKey) {
+                window.location.href = 'admin.html';
+            }
+        });
+    </script>
+
+</body>
+</html>
