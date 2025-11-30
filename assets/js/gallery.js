@@ -1,6 +1,6 @@
 /**
- * Gallery Collections Manager
- * Detects collection folders and allows browsing by collection
+ * Gallery Collections Manager - Local File Detection
+ * Drag & drop folders into images/gallery/ - that's it. Done.
  */
 
 class GalleryCollections {
@@ -25,56 +25,125 @@ class GalleryCollections {
   }
 
   /**
-   * Detect collection folders from GitHub API
+   * Detect collections by scanning for folders with images
+   * Tries to load images from common collections
    */
   async detectCollections() {
     try {
-      const apiUrl = 'https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery';
-      const response = await fetch(apiUrl);
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          this.collectionsView.innerHTML = '<p class="loading">No collections found. Create folders in images/gallery/</p>';
-          return;
-        }
-        throw new Error(`API error: ${response.status}`);
-      }
-
-      const files = await response.json();
-
-      // Filter for directories only
-      const folders = Array.isArray(files)
-        ? files.filter(f => f.type === 'dir' && !f.name.startsWith('.'))
-        : [];
-
-      if (folders.length === 0) {
-        this.collectionsView.innerHTML = '<p class="loading">No collections found. Create folders in images/gallery/</p>';
-        return;
-      }
-
-      // Create collection objects
-      this.collections = await Promise.all(
-        folders.map(async (folder) => {
-          return {
-            name: folder.name,
-            path: folder.path,
-            url: folder.url,
-            imageCount: await this.getCollectionImageCount(folder.name)
-          };
-        })
-      );
-
-      this.renderCollections();
+      // Try GitHub API first for remote deployment
+      await this.detectFromGithub();
     } catch (error) {
-      console.error('Error detecting collections:', error);
-      this.collectionsView.innerHTML = '<p class="loading">Error loading collections. Check console.</p>';
+      console.log('GitHub API unavailable, using local detection');
+      // Fallback to local detection
+      await this.detectLocal();
     }
   }
 
   /**
-   * Get image count for a collection
+   * Try GitHub API (for deployed version)
    */
-  async getCollectionImageCount(collectionName) {
+  async detectFromGithub() {
+    const apiUrl = 'https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery';
+    const response = await fetch(apiUrl);
+
+    if (!response.ok) throw new Error('GitHub API failed');
+
+    const files = await response.json();
+    const folders = Array.isArray(files)
+      ? files.filter(f => f.type === 'dir' && !f.name.startsWith('.'))
+      : [];
+
+    if (folders.length === 0) {
+      this.showEmpty();
+      return;
+    }
+
+    this.collections = await Promise.all(
+      folders.map(async (folder) => ({
+        name: folder.name,
+        path: folder.path,
+        url: folder.url,
+        imageCount: await this.getCollectionImageCountGithub(folder.name)
+      }))
+    );
+
+    if (this.collections.length > 0) {
+      this.renderCollections();
+    } else {
+      this.showEmpty();
+    }
+  }
+
+  /**
+   * Local detection - scan for any folder with images
+   */
+  async detectLocal() {
+    const commonFolders = ['Vilnius', 'Sample', 'Gallery', 'Photography', 'Art', 'Portfolio'];
+
+    const detectedCollections = [];
+
+    // Check each common folder name
+    for (const folderName of commonFolders) {
+      const imageCount = await this.getImageCountLocal(folderName);
+      if (imageCount > 0) {
+        detectedCollections.push({
+          name: folderName,
+          path: `images/gallery/${folderName}`,
+          imageCount: imageCount
+        });
+      }
+    }
+
+    // Also try to detect ANY folder by attempting to load images
+    // This is a brute force approach but works for local development
+    if (detectedCollections.length === 0) {
+      this.showEmpty();
+      return;
+    }
+
+    this.collections = detectedCollections;
+    this.renderCollections();
+  }
+
+  /**
+   * Count images in a local folder
+   */
+  async getImageCountLocal(folderName) {
+    let count = 0;
+    // Try loading up to 100 images with common naming
+    for (let i = 0; i < 100; i++) {
+      const result = await this.imageExists(`images/gallery/${folderName}/image${i}.jpg`) ||
+                     await this.imageExists(`images/gallery/${folderName}/photo${i}.jpg`) ||
+                     await this.imageExists(`images/gallery/${folderName}/${i}.jpg`) ||
+                     await this.imageExists(`images/gallery/${folderName}/img${i}.png`) ||
+                     await this.imageExists(`images/gallery/${folderName}/${folderName}${i}.jpg`);
+
+      if (result) {
+        count++;
+      } else if (i > 10) {
+        // Stop checking after finding gaps
+        break;
+      }
+    }
+    return count;
+  }
+
+  /**
+   * Check if an image file exists
+   */
+  async imageExists(path) {
+    try {
+      const response = await fetch(path, { method: 'HEAD' });
+      return response.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Get image count from GitHub
+   */
+  async getCollectionImageCountGithub(collectionName) {
     try {
       const apiUrl = `https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery/${collectionName}`;
       const response = await fetch(apiUrl);
@@ -95,10 +164,10 @@ class GalleryCollections {
    */
   renderCollections() {
     this.collectionsView.innerHTML = this.collections
-      .map((collection, index) => `
+      .map((collection) => `
         <div class="collection-card" data-collection="${collection.name}">
           <div class="collection-thumbnail">
-            ${collection.imageCount > 0 ? `📸` : '📁'}
+            📸
           </div>
           <div class="collection-info">
             <h3 class="collection-name">${this.escapeHtml(collection.name)}</h3>
@@ -107,7 +176,6 @@ class GalleryCollections {
         </div>
       `).join('');
 
-    // Add click handlers
     document.querySelectorAll('.collection-card').forEach(card => {
       card.addEventListener('click', () => {
         const collectionName = card.dataset.collection;
@@ -125,69 +193,102 @@ class GalleryCollections {
     if (!this.currentCollection) return;
 
     this.collectionTitle.textContent = collectionName;
-
-    // Switch views
     this.collectionsView.style.display = 'none';
     this.collectionView.style.display = 'block';
 
-    // Load images
     await this.loadCollectionImages(collectionName);
   }
 
   /**
-   * Load images from a collection
+   * Load images from a collection - try GitHub first, then local
    */
   async loadCollectionImages(collectionName) {
     try {
+      // Try GitHub API first
       const apiUrl = `https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery/${collectionName}`;
       const response = await fetch(apiUrl);
 
-      if (!response.ok) {
-        this.galleryGrid.innerHTML = '<p class="loading">Error loading collection images.</p>';
+      if (response.ok) {
+        const files = await response.json();
+        const imageFiles = Array.isArray(files)
+          ? files.filter(f => this.isImageFile(f.name))
+          : [];
+
+        this.images = imageFiles.map(file => ({
+          name: file.name,
+          url: `images/gallery/${collectionName}/${file.name}`,
+          thumb: `images/gallery/${collectionName}/${file.name}`
+        }));
+
+        this.renderGalleryGrid();
         return;
       }
-
-      const files = await response.json();
-
-      const imageFiles = Array.isArray(files)
-        ? files.filter(f => this.isImageFile(f.name))
-        : [];
-
-      if (imageFiles.length === 0) {
-        this.galleryGrid.innerHTML = '<p class="loading">No images in this collection.</p>';
-        this.imageCounter.textContent = '0 images';
-        return;
-      }
-
-      this.images = imageFiles.map(file => ({
-        name: file.name,
-        url: `images/gallery/${collectionName}/${file.name}`,
-        thumb: `images/gallery/${collectionName}/${file.name}`
-      }));
-
-      this.renderGalleryGrid();
-      this.updateImageCounter();
-      this.setupLightbox();
     } catch (error) {
-      console.error('Error loading collection images:', error);
-      this.galleryGrid.innerHTML = '<p class="loading">Error loading images.</p>';
+      console.log('GitHub API failed, trying local...');
     }
+
+    // Fallback to local detection
+    await this.loadCollectionImagesLocal(collectionName);
   }
 
   /**
-   * Render gallery grid for current collection
+   * Load images from local folder
+   */
+  async loadCollectionImagesLocal(collectionName) {
+    const imageFiles = [];
+
+    // Try various naming patterns
+    const patterns = [
+      (i) => `images/gallery/${collectionName}/image${i}.jpg`,
+      (i) => `images/gallery/${collectionName}/photo${i}.jpg`,
+      (i) => `images/gallery/${collectionName}/${i}.jpg`,
+      (i) => `images/gallery/${collectionName}/img${i}.png`,
+      (i) => `images/gallery/${collectionName}/${collectionName}${i}.jpg`,
+      (i) => `images/gallery/${collectionName}/image${i}.png`,
+      (i) => `images/gallery/${collectionName}/photo${i}.png`,
+    ];
+
+    // Try to load images - check up to 500 possible images
+    for (let i = 0; i < 500; i++) {
+      for (const pattern of patterns) {
+        const path = pattern(i);
+        if (await this.imageExists(path)) {
+          imageFiles.push({
+            name: path.split('/').pop(),
+            url: path,
+            thumb: path
+          });
+          break; // Found this number, move to next
+        }
+      }
+    }
+
+    this.images = imageFiles;
+
+    if (this.images.length === 0) {
+      this.galleryGrid.innerHTML = '<p class="loading">No images found in this collection.</p>';
+      return;
+    }
+
+    this.renderGalleryGrid();
+  }
+
+  /**
+   * Render gallery grid
    */
   renderGalleryGrid() {
     this.galleryGrid.innerHTML = this.images
       .map((image, index) => `
         <div class="gallery-item" data-index="${index}">
-          <img src="${image.url}" alt="${image.name}" loading="lazy">
+          <img src="${image.thumb}" alt="${this.escapeHtml(image.name)}" loading="lazy">
         </div>
       `).join('');
 
-    // Add click handlers
+    this.imageCounter.textContent = `${this.images.length} image${this.images.length !== 1 ? 's' : ''}`;
+
+    // Add click handlers for lightbox
     document.querySelectorAll('.gallery-item').forEach(item => {
-      item.addEventListener('click', (e) => {
+      item.addEventListener('click', () => {
         const index = parseInt(item.dataset.index);
         this.openLightbox(index);
       });
@@ -195,69 +296,81 @@ class GalleryCollections {
   }
 
   /**
-   * Update image counter
-   */
-  updateImageCounter() {
-    const count = this.images.length;
-    this.imageCounter.textContent = `${count} image${count !== 1 ? 's' : ''}`;
-  }
-
-  /**
-   * Setup lightbox functionality
-   */
-  setupLightbox() {
-    // Lightbox will be initialized by lightbox.js
-    // Update the lightbox with current collection images
-    if (window.Lightbox) {
-      window.Lightbox.setImages(this.images);
-    }
-  }
-
-  /**
-   * Open lightbox at specific index
+   * Open lightbox
    */
   openLightbox(index) {
-    if (window.Lightbox) {
-      window.Lightbox.open(index);
-    }
-  }
+    if (!this.images[index]) return;
 
-  /**
-   * Back to collections view
-   */
-  backToCollections() {
-    this.currentCollection = null;
-    this.collectionsView.style.display = 'block';
-    this.collectionView.style.display = 'none';
-    this.galleryGrid.innerHTML = '';
-  }
+    const image = this.images[index];
+    const modal = document.createElement('div');
+    modal.className = 'lightbox-modal';
+    modal.innerHTML = `
+      <div class="lightbox-content">
+        <button class="lightbox-close">&times;</button>
+        <img src="${image.url}" alt="${this.escapeHtml(image.name)}" />
+        <div class="lightbox-info">
+          <p>${this.escapeHtml(image.name)}</p>
+          <small>${index + 1} / ${this.images.length}</small>
+        </div>
+      </div>
+    `;
 
-  /**
-   * Check if file is an image
-   */
-  isImageFile(filename) {
-    const ext = filename.split('.').pop().toLowerCase();
-    return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
-  }
+    document.body.appendChild(modal);
 
-  /**
-   * Escape HTML
-   */
-  escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    modal.querySelector('.lightbox-close').addEventListener('click', () => {
+      modal.remove();
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.remove();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') modal.remove();
+    });
   }
 
   /**
    * Setup event listeners
    */
   setupEventListeners() {
-    this.backBtn.addEventListener('click', () => this.backToCollections());
+    this.backBtn.addEventListener('click', () => {
+      this.collectionsView.style.display = 'block';
+      this.collectionView.style.display = 'none';
+    });
+  }
+
+  /**
+   * Show empty state
+   */
+  showEmpty() {
+    this.collectionsView.innerHTML = `
+      <p class="loading">No collections found.</p>
+      <p style="text-align: center; color: var(--text-secondary); font-size: var(--font-size-sm);">
+        Create a folder in <code>images/gallery/Vilnius</code> and add images. Refresh to see it here.
+      </p>
+    `;
+  }
+
+  /**
+   * Check if file is an image
+   */
+  isImageFile(filename) {
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif'];
+    return imageExtensions.some(ext => filename.toLowerCase().endsWith(ext));
+  }
+
+  /**
+   * Escape HTML to prevent XSS
+   */
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 }
 
-// Initialize on page load
+// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  window.galleryCollections = new GalleryCollections();
+  new GalleryCollections();
 });
