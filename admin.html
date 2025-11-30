@@ -160,50 +160,115 @@
             <div id="articlesTab" class="admin-tab-content">
                 <h2>Article Management</h2>
 
-                <div class="article-editor-section">
-                    <h3 id="editorTitle">Create New Article</h3>
+                <div class="article-editor-wrapper">
+                    <div class="article-editor-left">
+                        <div class="article-editor-section">
+                            <h3 id="editorTitle">Create New Article</h3>
 
-                    <form id="articleForm" class="article-form">
-                        <div class="form-group">
-                            <label for="articleTitle">Article Title *</label>
-                            <input type="text" id="articleTitle" name="title" required placeholder="Enter article title">
-                        </div>
+                            <form id="articleForm" class="article-form">
+                                <!-- Basic Info -->
+                                <div class="form-group">
+                                    <label for="articleTitle">Title *</label>
+                                    <input type="text" id="articleTitle" name="title" required placeholder="Enter article title">
+                                </div>
 
-                        <div class="form-group">
-                            <label for="articleCategory">Category</label>
-                            <input type="text" id="articleCategory" name="category" placeholder="e.g., Photography, Art, Process">
-                        </div>
+                                <div class="form-group-row">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label for="articleAuthor">Author *</label>
+                                        <input type="text" id="articleAuthor" name="author" required placeholder="Your name">
+                                    </div>
+                                    <div class="form-group" style="flex: 1;">
+                                        <label for="articleCategory">Category</label>
+                                        <input type="text" id="articleCategory" name="category" placeholder="e.g., Photography, Art">
+                                    </div>
+                                </div>
 
-                        <div class="form-group">
-                            <label for="articleAuthor">Author *</label>
-                            <input type="text" id="articleAuthor" name="author" required placeholder="Your name">
-                        </div>
+                                <!-- Featured Image Selector -->
+                                <div class="form-group">
+                                    <label>Featured Image</label>
+                                    <div class="featured-image-selector">
+                                        <div id="featuredImagePreview" class="featured-image-preview">
+                                            <p>No image selected</p>
+                                        </div>
+                                        <div class="featured-image-controls">
+                                            <button type="button" id="openImageLibraryBtn" class="btn-secondary btn-small">Choose from Library</button>
+                                            <button type="button" id="uploadImageBtn" class="btn-secondary btn-small">Upload New</button>
+                                            <button type="button" id="clearImageBtn" class="btn-secondary btn-small" style="display: none;">Clear</button>
+                                        </div>
+                                        <input type="hidden" id="articleThumbnail" name="thumbnail">
+                                    </div>
+                                </div>
 
-                        <div class="form-group">
-                            <label for="articleExcerpt">Excerpt</label>
-                            <textarea id="articleExcerpt" name="excerpt" rows="2" placeholder="Short preview text (optional)"></textarea>
-                        </div>
+                                <!-- Excerpt -->
+                                <div class="form-group">
+                                    <label for="articleExcerpt">Excerpt (auto-generated if blank)</label>
+                                    <textarea id="articleExcerpt" name="excerpt" rows="2" placeholder="Short preview text (optional)"></textarea>
+                                </div>
 
-                        <div class="form-group">
-                            <label for="articleBody">Article Content * (Markdown supported)</label>
-                            <textarea id="articleBody" name="body" rows="12" required placeholder="Write your article here. Supports Markdown formatting."></textarea>
-                            <p class="form-hint">Supports: **bold**, *italic*, # Headers, > Quotes, `code`, [links](url)</p>
-                        </div>
+                                <!-- Content Editor with Toolbar -->
+                                <div class="form-group">
+                                    <label for="articleBody">Article Content *</label>
+                                    <div class="markdown-toolbar">
+                                        <button type="button" class="toolbar-btn" data-command="bold" title="Bold (Ctrl+B)">B</button>
+                                        <button type="button" class="toolbar-btn" data-command="italic" title="Italic (Ctrl+I)">I</button>
+                                        <button type="button" class="toolbar-btn" data-command="h1" title="Heading 1"># H1</button>
+                                        <button type="button" class="toolbar-btn" data-command="h2" title="Heading 2">## H2</button>
+                                        <button type="button" class="toolbar-btn" data-command="link" title="Link">[Link]</button>
+                                        <button type="button" class="toolbar-btn" data-command="quote" title="Quote">&gt; Quote</button>
+                                        <button type="button" class="toolbar-btn" data-command="code" title="Code">`Code`</button>
+                                        <button type="button" class="toolbar-btn" data-command="ul" title="Bullet List">• List</button>
+                                    </div>
+                                    <textarea id="articleBody" name="body" rows="16" required placeholder="Write your article here. Supports Markdown formatting."></textarea>
+                                    <div class="editor-stats">
+                                        <span id="wordCount">0 words</span>
+                                        <span id="readingTime">~ 0 min read</span>
+                                    </div>
+                                </div>
 
-                        <div class="form-group">
-                            <label for="articleThumbnail">Thumbnail URL</label>
-                            <input type="url" id="articleThumbnail" name="thumbnail" placeholder="https://example.com/image.jpg (optional)">
-                        </div>
+                                <!-- Publish Status -->
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="articlePublished" name="published" checked>
+                                        Publish immediately
+                                    </label>
+                                </div>
 
-                        <div class="form-actions">
-                            <button type="submit" id="submitBtn" class="btn-primary">Create Article</button>
-                            <button type="reset" id="resetBtn" class="btn-secondary">Clear Form</button>
-                            <button type="button" id="cancelEditBtn" class="btn-secondary" style="display: none;">Cancel Editing</button>
+                                <!-- Form Actions -->
+                                <div class="form-actions">
+                                    <button type="submit" id="submitBtn" class="btn-primary">Create Article</button>
+                                    <button type="reset" id="resetBtn" class="btn-secondary">Clear Form</button>
+                                    <button type="button" id="cancelEditBtn" class="btn-secondary" style="display: none;">Cancel Editing</button>
+                                </div>
+                            </form>
                         </div>
-                    </form>
+                    </div>
+
+                    <!-- Live Preview Pane -->
+                    <div class="article-preview-pane">
+                        <h3>Live Preview</h3>
+                        <div id="articlePreview" class="article-preview-content">
+                            <p style="color: var(--text-secondary); text-align: center; padding: 32px;">Start typing to see preview...</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="articles-list">
+                <!-- Image Library Modal -->
+                <div id="imageLibraryModal" class="admin-modal" style="display: none;">
+                    <div class="modal-overlay"></div>
+                    <div class="modal-content">
+                        <button class="modal-close">&times;</button>
+                        <h2>Select Image</h2>
+                        <div id="imageLibraryGrid" class="image-library-grid">
+                            <p class="loading">Loading images...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Upload Input (hidden) -->
+                <input type="file" id="articleImageUpload" accept="image/*" style="display: none;">
+
+                <!-- Articles List -->
+                <div class="articles-list-section">
                     <h3>Published Articles</h3>
                     <div id="articlesList" class="articles-table">
                         <p class="loading">Loading articles...</p>
@@ -241,26 +306,108 @@
             <div id="galleryTab" class="admin-tab-content">
                 <h2>Gallery Management</h2>
 
-                <div class="upload-section">
-                    <h3>Upload Gallery Images</h3>
-                    <p class="upload-info">Supported formats: JPG, PNG, WebP</p>
-                    <div class="upload-area" id="galleryUploadArea">
-                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <rect x="3" y="3" width="18" height="18" rx="2"/>
-                            <circle cx="8.5" cy="8.5" r="1.5"/>
-                            <polyline points="21 15 16 10 5 21"/>
-                        </svg>
-                        <p>Drag and drop images here or click to browse</p>
-                        <input type="file" id="galleryInput" accept="image/*" multiple style="display: none;">
+                <div class="gallery-management-wrapper">
+                    <!-- Collections Sidebar -->
+                    <div class="gallery-sidebar">
+                        <div class="sidebar-header">
+                            <h3>Collections</h3>
+                            <button type="button" id="newCollectionBtn" class="btn-small btn-primary">+ New</button>
+                        </div>
+
+                        <!-- New Collection Form -->
+                        <div id="newCollectionForm" class="collection-form" style="display: none;">
+                            <input type="text" id="collectionNameInput" placeholder="Collection name" class="form-input-small">
+                            <div class="form-actions-small">
+                                <button type="button" id="createCollectionBtn" class="btn-small btn-primary">Create</button>
+                                <button type="button" id="cancelCollectionBtn" class="btn-small btn-secondary">Cancel</button>
+                            </div>
+                        </div>
+
+                        <!-- Collections List -->
+                        <div id="collectionsList" class="collections-list">
+                            <p class="loading">Loading collections...</p>
+                        </div>
+                    </div>
+
+                    <!-- Gallery Content -->
+                    <div class="gallery-content">
+                        <!-- No Collection Selected Message -->
+                        <div id="noCollectionSelected" class="gallery-empty-message" style="display: flex;">
+                            <p>Select a collection to manage images</p>
+                            <p class="text-secondary">Click a collection from the list to get started</p>
+                        </div>
+
+                        <!-- Collection Detail View -->
+                        <div id="collectionDetail" class="collection-detail" style="display: none;">
+                            <!-- Collection Header -->
+                            <div class="collection-header">
+                                <div class="collection-header-info">
+                                    <h3 id="selectedCollectionName"></h3>
+                                    <p id="collectionImageCount" class="text-secondary"></p>
+                                </div>
+                                <div class="collection-header-actions">
+                                    <button type="button" id="renameCollectionBtn" class="btn-small btn-secondary" title="Rename collection">✎ Rename</button>
+                                    <button type="button" id="deleteCollectionBtn" class="btn-small btn-danger" title="Delete collection">🗑 Delete</button>
+                                </div>
+                            </div>
+
+                            <!-- Rename Collection Form -->
+                            <div id="renameForm" class="collection-form" style="display: none;">
+                                <input type="text" id="renameInput" placeholder="New name" class="form-input-small">
+                                <div class="form-actions-small">
+                                    <button type="button" id="confirmRenameBtn" class="btn-small btn-primary">Rename</button>
+                                    <button type="button" id="cancelRenameBtn" class="btn-small btn-secondary">Cancel</button>
+                                </div>
+                            </div>
+
+                            <!-- Upload Images Section -->
+                            <div class="upload-section">
+                                <h4>Upload Images</h4>
+                                <div class="upload-area" id="galleryUploadArea">
+                                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                                        <polyline points="21 15 16 10 5 21"/>
+                                    </svg>
+                                    <p>Drag and drop images here or click to browse</p>
+                                    <p class="upload-formats">JPG, PNG, WebP, GIF</p>
+                                    <input type="file" id="galleryInput" accept="image/*" multiple style="display: none;">
+                                </div>
+                            </div>
+
+                            <!-- Sorting Controls -->
+                            <div class="gallery-controls">
+                                <div class="gallery-controls-left">
+                                    <label for="sortGallery" class="label-small">Sort by:</label>
+                                    <select id="sortGallery" class="form-select-small">
+                                        <option value="name">Name (A-Z)</option>
+                                        <option value="name-desc">Name (Z-A)</option>
+                                        <option value="date">Date Added (newest)</option>
+                                        <option value="date-old">Date Added (oldest)</option>
+                                        <option value="size">File Size</option>
+                                    </select>
+                                </div>
+                                <div class="gallery-controls-right">
+                                    <label class="checkbox-label-small">
+                                        <input type="checkbox" id="selectAllImages">
+                                        Select All
+                                    </label>
+                                    <button type="button" id="deleteSelectedBtn" class="btn-small btn-danger" style="display: none;">
+                                        Delete Selected
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Images Grid -->
+                            <div id="collectionImagesGrid" class="collection-images-grid">
+                                <p class="loading">Loading images...</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="file-list">
-                    <h3>Images in Gallery</h3>
-                    <div id="galleryList" class="file-grid">
-                        <p class="loading">Loading gallery...</p>
-                    </div>
-                </div>
+                <!-- Hidden file input -->
+                <input type="file" id="galleryBulkInput" accept="image/*" multiple style="display: none;">
             </div>
 
             <!-- Settings Tab -->

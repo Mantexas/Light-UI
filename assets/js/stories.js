@@ -42,27 +42,40 @@ class StoriesPage {
   }
 
   /**
+   * Calculate reading time based on word count
+   */
+  calculateReadingTime(text) {
+    const wordCount = text.trim().split(/\s+/).filter(w => w).length;
+    const readingTime = Math.ceil(wordCount / 200); // 200 words per minute
+    return readingTime;
+  }
+
+  /**
    * Render article cards in grid
    */
   renderArticles() {
     this.storiesGrid.innerHTML = this.articles
       .sort((a, b) => new Date(b.date) - new Date(a.date))
-      .map((article, index) => `
-        <article class="article-card" data-index="${index}">
-          <div class="article-thumbnail">
-            ${article.thumbnail ? `<img src="${article.thumbnail}" alt="${article.title}" onerror="this.style.display='none';">` : '📝'}
-          </div>
-          <div class="article-content">
-            ${article.category ? `<span class="article-tag">${article.category}</span>` : ''}
-            <h2 class="article-title">${this.escapeHtml(article.title)}</h2>
-            <p class="article-excerpt">${this.escapeHtml(article.excerpt || article.body.substring(0, 150))}</p>
-            <div class="article-meta">
-              <span>${this.formatDate(article.date)}</span>
-              <span>by ${this.escapeHtml(article.author || 'Anonymous')}</span>
+      .map((article, index) => {
+        const readingTime = this.calculateReadingTime(article.body);
+        return `
+          <article class="article-card" data-index="${index}">
+            <div class="article-thumbnail">
+              ${article.thumbnail ? `<img src="${article.thumbnail}" alt="${article.title}" onerror="this.style.display='none';">` : '📝'}
             </div>
-          </div>
-        </article>
-      `).join('');
+            <div class="article-content">
+              ${article.category ? `<span class="article-tag">${article.category}</span>` : ''}
+              <h2 class="article-title">${this.escapeHtml(article.title)}</h2>
+              <p class="article-excerpt">${this.escapeHtml(article.excerpt || article.body.substring(0, 150))}</p>
+              <div class="article-meta">
+                <span>${this.formatDate(article.date)}</span>
+                <span>by ${this.escapeHtml(article.author || 'Anonymous')}</span>
+                <span>~${readingTime} min read</span>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
 
     // Add click handlers to cards
     document.querySelectorAll('.article-card').forEach(card => {
@@ -77,9 +90,18 @@ class StoriesPage {
    * Open article in modal
    */
   openArticle(article) {
+    const readingTime = this.calculateReadingTime(article.body);
+
     document.getElementById('articleTitle').textContent = article.title;
     document.getElementById('articleDate').textContent = `Published ${this.formatDate(article.date)}`;
     document.getElementById('articleAuthor').textContent = `By ${article.author || 'Anonymous'}`;
+
+    // Add reading time to modal header if element exists
+    const readingTimeEl = document.getElementById('articleReadingTime');
+    if (readingTimeEl) {
+      readingTimeEl.textContent = `~${readingTime} min read`;
+    }
+
     document.getElementById('articleBody').innerHTML = this.parseMarkdown(article.body);
 
     this.articleModal.classList.add('active');
