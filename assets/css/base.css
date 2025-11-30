@@ -128,13 +128,6 @@ footer p {
   }
 }
 
-@media (max-width: 768px) {
-  footer {
-    padding-left: var(--space-md);
-    padding-right: var(--space-md);
-  }
-}
-
 @media (max-width: 480px) {
   footer {
     padding-left: var(--space-md);

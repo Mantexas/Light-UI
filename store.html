@@ -4,141 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Store - Gediminaš Zdancius Fine Art</title>
-    <meta name="description" content="Order fine art prints printed on exceptional materials.
-    
+    <meta name="description" content="Order fine art prints printed on exceptional materials.">
+
     <!-- CSS Files -->
     <link rel="stylesheet" href="assets/css/variables.css">
     <link rel="stylesheet" href="assets/css/base.css">
     <link rel="stylesheet" href="assets/css/navigation.css">
-    <link rel="stylesheet" href="assets/css/gallery.css">
+    <link rel="stylesheet" href="assets/css/store.css">
     <link rel="stylesheet" href="assets/css/lightbox.css">
     <link rel="stylesheet" href="assets/css/animations.css">
-    <link rel="stylesheet" href="assets/css/home.css">
-    <style>
-        .store-container {
-            max-width: var(--container-max-width);
-            margin: 0 auto;
-            padding: var(--space-lg) var(--space-xl);
-        }
-        
-        .store-intro {
-            text-align: center;
-            margin-bottom: var(--space-2xl);
-        }
-        
-        .store-intro h1 {
-            font-size: var(--font-size-xl);
-            margin-bottom: var(--space-md);
-        }
-        
-        .store-intro p {
-            font-size: var(--font-size-md);
-            color: var(--text-secondary);
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: var(--line-height-relaxed);
-        }
-        
-        .store-gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: var(--space-lg);
-            margin-bottom: var(--space-2xl);
-        }
-        
-        .store-item {
-            cursor: pointer;
-            transition: transform var(--transition-normal);
-        }
-        
-        .store-item:hover {
-            transform: scale(1.02);
-        }
-        
-        .store-item img {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-        
-        .store-item-title {
-            margin-top: var(--space-sm);
-            font-size: var(--font-size-sm);
-            color: var(--text-secondary);
-        }
-        
-        .order-form {
-            max-width: 600px;
-            margin: var(--space-2xl) auto;
-            padding: var(--space-xl);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-        }
-        
-        .form-group {
-            margin-bottom: var(--space-lg);
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: var(--space-xs);
-            font-weight: var(--font-weight-medium);
-            font-size: var(--font-size-sm);
-        }
-        
-        .form-group select,
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: var(--space-md);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: var(--font-size-sm);
-            font-family: inherit;
-        }
-        
-        .form-group textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-        
-        .order-button {
-            width: 100%;
-            padding: var(--space-md) var(--space-xl);
-            background: var(--text-primary);
-            color: var(--bg-primary);
-            border: 2px solid var(--text-primary);
-            border-radius: 4px;
-            font-size: var(--font-size-sm);
-            font-weight: var(--font-weight-medium);
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all var(--transition-normal);
-        }
-        
-        .order-button:hover {
-            background: var(--bg-primary);
-            color: var(--text-primary);
-        }
-        
-        @media (max-width: 768px) {
-            .store-container {
-                padding: var(--space-lg) var(--space-md);
-            }
-
-            .store-gallery {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .store-container {
-                padding: var(--space-lg) var(--space-md);
-            }
-        }
-    </style>
 </head>
 <body>
     
@@ -246,17 +120,22 @@
     // Load store gallery
     async function loadStoreGallery() {
         const storeGallery = document.getElementById('storeGallery');
-        
+
         try {
             const apiUrl = 'https://api.github.com/repos/Mantexas/Light-UI/contents/images/large';
             const response = await fetch(apiUrl);
             const files = await response.json();
-            
+
             const imageFiles = files.filter(file => {
                 const ext = file.name.split('.').pop().toLowerCase();
                 return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
             });
-            
+
+            if (imageFiles.length === 0) {
+                showEmptyState();
+                return;
+            }
+
             imageFiles.forEach(file => {
                 const item = document.createElement('div');
                 item.className = 'store-item';
@@ -267,10 +146,21 @@
                 item.addEventListener('click', () => selectArtwork(file.name));
                 storeGallery.appendChild(item);
             });
-            
+
         } catch (error) {
             console.error('Error loading store gallery:', error);
+            showEmptyState();
         }
+    }
+
+    function showEmptyState() {
+        const storeGallery = document.getElementById('storeGallery');
+        storeGallery.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 96px 32px; min-height: 400px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                <p style="font-size: var(--font-size-lg); color: var(--text-secondary); margin: 0 0 16px 0; max-width: 500px;">Coming Soon</p>
+                <p style="font-size: var(--font-size-sm); color: var(--text-secondary); font-weight: 300; max-width: 500px; line-height: 1.65; margin: 0;">We're carefully curating a selection of fine art prints. Check back soon to order exceptional artwork on premium materials.</p>
+            </div>
+        `;
     }
     
     // Select artwork for order
