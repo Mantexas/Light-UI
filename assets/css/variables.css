@@ -1,4 +1,28 @@
 /* ============================================
+   ⚠️  STYLE CONSTITUTION VARIABLES
+   DO NOT MODIFY WITHOUT EXPLICIT APPROVAL
+   ============================================
+
+   SPACING SCALE (IMMUTABLE):
+   --space-xs:   8px   (never used for containers)
+   --space-sm:   16px  (internal spacing only)
+   --space-md:   32px  (responsive padding - mobile/tablet)
+   --space-lg:   64px  (vertical padding - ALL pages)
+   --space-xl:   96px  (horizontal padding - desktop)
+   --space-2xl:  128px (margins between major sections)
+
+   USAGE RULES:
+   ✅ Container padding: var(--space-lg) var(--space-xl)
+   ✅ Responsive padding: var(--space-lg) var(--space-md)
+   ✅ Interior spacing: var(--space-md), var(--space-lg)
+   ❌ NO hardcoded pixel values
+   ❌ NO creating new spacing variables
+   ❌ NO arbitrary spacing scales
+
+   READ: ../../STYLE_CONSTITUTION.md
+   ============================================ */
+
+/* ============================================
    Design System Variables
    Anthropic-Inspired Minimal Design
    ============================================ */

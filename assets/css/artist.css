@@ -1,4 +1,16 @@
 /* ============================================
+   ⚠️  STYLE CONSTITUTION ENFORCEMENT
+   ============================================
+
+   THIS PAGE MUST HAVE:
+   • .about-container with padding: var(--space-lg) var(--space-xl)
+   • @media (max-width: 768px) with padding: var(--space-lg) var(--space-md)
+   • @media (max-width: 480px) with padding: var(--space-lg) var(--space-md)
+
+   READ: ../../../STYLE_CONSTITUTION.md
+   ============================================ */
+
+/* ============================================
    About / Artist Page Styles
    ============================================ */
 

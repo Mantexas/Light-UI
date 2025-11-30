@@ -1,3 +1,18 @@
+/* ============================================
+   ⚠️  STYLE CONSTITUTION - READ STYLE_CONSTITUTION.md
+   ============================================
+
+   MANDATORY RULES:
+   1. All page containers: padding: var(--space-lg) var(--space-xl)
+   2. Responsive padding: @media (max-width: 768px) and (max-width: 480px)
+   3. Footer ONLY in this file, NEVER duplicate elsewhere
+   4. Font: Poppins Light (300), NEVER hardcode
+   5. Use CSS variables for spacing, NEVER hardcoded pixels
+   6. Footer styling is global - DO NOT ADD FOOTER CSS TO OTHER FILES
+
+   Violation = user experience breaks. NO EXCEPTIONS.
+   ============================================ */
+
 /* Google Fonts - Poppins */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
