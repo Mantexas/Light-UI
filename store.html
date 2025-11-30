@@ -143,7 +143,7 @@
                 <li><a href="index.html">HOME</a></li>
                 <li><a href="store.html" class="active">STORE</a></li>
                 <li><a href="color.html">GALLERY</a></li>
-                <li><a href="monochrome.html">MONOCHROME</a></li>
+                <li><a href="film.html">FILM</a></li>
                 <li><a href="artist.html">ABOUT</a></li>
                 <li><a href="stories.html">STORIES</a></li>
             </ul>
@@ -221,10 +221,17 @@
     </div>
 
     <!-- Footer -->
-    <footer>
+    <footer style="cursor: pointer;" title="Shift+Click for admin">
         <p>&copy; 2024 All rights reserved. Our creative works are protected by copyright laws and the delicate boundaries of human understanding.</p>
     </footer>
 
+    <script>
+        document.querySelector('footer').addEventListener('click', function(e) {
+            if (e.shiftKey) {
+                window.location.href = 'admin.html';
+            }
+        });
+    </script>
     <script>
     // Load store gallery
     async function loadStoreGallery() {
