@@ -29,6 +29,7 @@ class AdminPanel {
     if (this.isAuthenticated) {
       this.showDashboard();
       this.loadStats();
+      this.setupArticleEditor();
     } else {
       this.showLogin();
     }
@@ -148,6 +149,16 @@ class AdminPanel {
       const videoFiles = await videosResponse.json();
       const videosCount = Array.isArray(videoFiles) ? videoFiles.filter(f => this.isVideoFile(f.name)).length : 0;
       document.getElementById('videosCount').textContent = videosCount;
+
+      // Load articles count
+      const articles = JSON.parse(localStorage.getItem('articles') || '[]');
+      const articlesCount = articles.length;
+
+      // Add articles stat if element exists
+      const articleStatEl = document.querySelector('[data-stat="articles"]');
+      if (articleStatEl) {
+        articleStatEl.textContent = articlesCount;
+      }
 
       // Estimate storage
       const totalSize = (galleryFiles.length * 2) + (videoFiles.length * 50); // Rough estimate
@@ -328,6 +339,183 @@ class AdminPanel {
     const sizes = ['Bytes', 'KB', 'MB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  }
+
+  /**
+   * Setup article editor
+   */
+  setupArticleEditor() {
+    const form = document.getElementById('articleForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+
+    if (form) {
+      form.addEventListener('submit', (e) => this.handleArticleSubmit(e));
+      submitBtn.addEventListener('click', () => {
+        if (!form.checkValidity()) return;
+      });
+      cancelEditBtn.addEventListener('click', () => this.cancelArticleEdit());
+    }
+
+    this.loadArticlesList();
+  }
+
+  /**
+   * Handle article form submission
+   */
+  handleArticleSubmit(e) {
+    e.preventDefault();
+
+    const form = document.getElementById('articleForm');
+    const editingId = form.dataset.editingId;
+
+    const article = {
+      id: editingId || Date.now().toString(),
+      title: document.getElementById('articleTitle').value,
+      category: document.getElementById('articleCategory').value,
+      author: document.getElementById('articleAuthor').value,
+      excerpt: document.getElementById('articleExcerpt').value,
+      body: document.getElementById('articleBody').value,
+      thumbnail: document.getElementById('articleThumbnail').value,
+      date: editingId ? this.getArticleById(editingId).date : new Date().toISOString()
+    };
+
+    let articles = JSON.parse(localStorage.getItem('articles') || '[]');
+
+    if (editingId) {
+      // Update existing
+      articles = articles.map(a => a.id === editingId ? article : a);
+      document.getElementById('editorTitle').textContent = 'Create New Article';
+      document.getElementById('submitBtn').textContent = 'Create Article';
+      document.getElementById('cancelEditBtn').style.display = 'none';
+      delete form.dataset.editingId;
+    } else {
+      // Create new
+      articles.push(article);
+    }
+
+    localStorage.setItem('articles', JSON.stringify(articles));
+    form.reset();
+    this.loadArticlesList();
+    alert('Article ' + (editingId ? 'updated' : 'created') + ' successfully!');
+  }
+
+  /**
+   * Load articles list for admin display
+   */
+  loadArticlesList() {
+    const articlesList = document.getElementById('articlesList');
+    const articles = JSON.parse(localStorage.getItem('articles') || '[]');
+
+    if (articles.length === 0) {
+      articlesList.innerHTML = '<p class="loading">No articles yet. Create your first article!</p>';
+      return;
+    }
+
+    articlesList.innerHTML = articles
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .map(article => `
+        <div class="article-item">
+          <div class="article-item-info">
+            <h4 class="article-item-title">${this.escapeHtml(article.title)}</h4>
+            <div class="article-item-meta">
+              <span>${this.formatDate(article.date)}</span>
+              <span>By ${this.escapeHtml(article.author)}</span>
+              ${article.category ? `<span>${this.escapeHtml(article.category)}</span>` : ''}
+            </div>
+          </div>
+          <div class="article-item-actions">
+            <button class="article-btn article-btn-edit" data-id="${article.id}">Edit</button>
+            <button class="article-btn article-btn-delete" data-id="${article.id}">Delete</button>
+          </div>
+        </div>
+      `).join('');
+
+    // Add event listeners to edit/delete buttons
+    document.querySelectorAll('.article-btn-edit').forEach(btn => {
+      btn.addEventListener('click', () => this.editArticle(btn.dataset.id));
+    });
+
+    document.querySelectorAll('.article-btn-delete').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to delete this article?')) {
+          this.deleteArticle(btn.dataset.id);
+        }
+      });
+    });
+  }
+
+  /**
+   * Edit article
+   */
+  editArticle(id) {
+    const article = this.getArticleById(id);
+    if (!article) return;
+
+    document.getElementById('articleTitle').value = article.title;
+    document.getElementById('articleCategory').value = article.category || '';
+    document.getElementById('articleAuthor').value = article.author;
+    document.getElementById('articleExcerpt').value = article.excerpt || '';
+    document.getElementById('articleBody').value = article.body;
+    document.getElementById('articleThumbnail').value = article.thumbnail || '';
+
+    const form = document.getElementById('articleForm');
+    form.dataset.editingId = id;
+    document.getElementById('editorTitle').textContent = 'Edit Article';
+    document.getElementById('submitBtn').textContent = 'Update Article';
+    document.getElementById('cancelEditBtn').style.display = 'block';
+
+    // Scroll to form
+    document.querySelector('.article-editor-section').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  /**
+   * Delete article
+   */
+  deleteArticle(id) {
+    let articles = JSON.parse(localStorage.getItem('articles') || '[]');
+    articles = articles.filter(a => a.id !== id);
+    localStorage.setItem('articles', JSON.stringify(articles));
+    this.loadArticlesList();
+    alert('Article deleted successfully!');
+  }
+
+  /**
+   * Cancel article editing
+   */
+  cancelArticleEdit() {
+    const form = document.getElementById('articleForm');
+    form.reset();
+    delete form.dataset.editingId;
+    document.getElementById('editorTitle').textContent = 'Create New Article';
+    document.getElementById('submitBtn').textContent = 'Create Article';
+    document.getElementById('cancelEditBtn').style.display = 'none';
+  }
+
+  /**
+   * Get article by ID
+   */
+  getArticleById(id) {
+    const articles = JSON.parse(localStorage.getItem('articles') || '[]');
+    return articles.find(a => a.id === id);
+  }
+
+  /**
+   * Format date
+   */
+  formatDate(dateString) {
+    const date = new Date(dateString);
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+  }
+
+  /**
+   * Escape HTML
+   */
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 }
 

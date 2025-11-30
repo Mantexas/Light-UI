@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stories - Gediminaš Zdancius</title>
+    <meta name="description" content="Articles and stories about photography, art, and creative process.">
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="assets/css/variables.css">
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/navigation.css">
+    <link rel="stylesheet" href="assets/css/stories.css">
+    <link rel="stylesheet" href="assets/css/animations.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <h1>Fine Art<br>Collection</h1>
+                <p class="logo-subtitle">Gediminaš Zdancius</p>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="store.html">STORE</a></li>
+                <li><a href="color.html">GALLERY</a></li>
+                <li><a href="film.html">FILM</a></li>
+                <li><a href="artist.html">ABOUT</a></li>
+                <li><a href="stories.html" class="active">STORIES</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Stories Container -->
+    <div class="stories-container">
+
+        <!-- Stories Header -->
+        <header class="stories-header">
+            <h1 class="stories-title">Stories</h1>
+            <p class="stories-description">Articles and insights about photography, creative process, and art</p>
+        </header>
+
+        <!-- Stories Grid -->
+        <div class="stories-grid" id="storiesGrid">
+            <p class="loading">Loading articles...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <p>No articles available yet. Check back soon!</p>
+        </div>
+
+    </div>
+
+    <!-- Article Modal -->
+    <div class="article-modal" id="articleModal">
+        <button class="modal-close" aria-label="Close article">&times;</button>
+        <div class="modal-content">
+            <article class="article-full">
+                <header class="article-header">
+                    <h1 id="articleTitle"></h1>
+                    <div class="article-meta">
+                        <span id="articleDate"></span>
+                        <span id="articleAuthor"></span>
+                    </div>
+                </header>
+                <div id="articleBody" class="article-body"></div>
+            </article>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="cursor: pointer;" title="Shift+Click for admin">
+        <p>&copy; 2024 All rights reserved. Our creative works are protected by copyright laws and the delicate boundaries of human understanding.</p>
+    </footer>
+
+    <!-- JavaScript Files -->
+    <script src="assets/js/stories.js"></script>
+    <script>
+        document.querySelector('footer').addEventListener('click', function(e) {
+            if (e.shiftKey) {
+                window.location.href = 'admin.html';
+            }
+        });
+    </script>
+
+</body>
+</html>
