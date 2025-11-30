@@ -104,3 +104,22 @@ footer p {
   color: var(--text-secondary);
   margin: 0;
 }
+
+/* Footer Responsive */
+@media (max-width: 768px) {
+  footer {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+}
+
+@media (max-width: 480px) {
+  footer {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+
+  footer p {
+    font-size: var(--font-size-xs);
+  }
+}
