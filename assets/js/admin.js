@@ -29,6 +29,7 @@ class AdminPanel {
     if (this.isAuthenticated) {
       this.showDashboard();
       this.loadStats();
+      this.setupAboutEditor();
       this.setupArticleEditor();
     } else {
       this.showLogin();
@@ -339,6 +340,52 @@ class AdminPanel {
     const sizes = ['Bytes', 'KB', 'MB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  }
+
+  /**
+   * Setup about editor
+   */
+  setupAboutEditor() {
+    const form = document.getElementById('aboutForm');
+    const submitBtn = document.getElementById('aboutSubmitBtn');
+
+    if (form) {
+      form.addEventListener('submit', (e) => this.handleAboutSubmit(e));
+      this.loadAboutContent();
+    }
+  }
+
+  /**
+   * Load about content into form
+   */
+  loadAboutContent() {
+    const stored = localStorage.getItem('aboutContent');
+
+    if (stored) {
+      const content = JSON.parse(stored);
+      document.getElementById('aboutTextMain').value = content.textMain || '';
+      document.getElementById('aboutImageUrl').value = content.imageUrl || '';
+      document.getElementById('aboutImageName').value = content.imageName || '';
+      document.getElementById('aboutTextBottom').value = content.textBottom || '';
+    }
+  }
+
+  /**
+   * Handle about form submission
+   */
+  handleAboutSubmit(e) {
+    e.preventDefault();
+
+    const content = {
+      textMain: document.getElementById('aboutTextMain').value,
+      imageUrl: document.getElementById('aboutImageUrl').value,
+      imageName: document.getElementById('aboutImageName').value,
+      textBottom: document.getElementById('aboutTextBottom').value,
+      lastUpdated: new Date().toISOString()
+    };
+
+    localStorage.setItem('aboutContent', JSON.stringify(content));
+    alert('About content saved successfully! Changes will appear on the About page.');
   }
 
   /**
