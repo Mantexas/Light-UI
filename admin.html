@@ -73,6 +73,7 @@
             <!-- Navigation Tabs -->
             <div class="admin-tabs">
                 <button class="admin-tab-btn active" data-tab="dashboard">Dashboard</button>
+                <button class="admin-tab-btn" data-tab="articles">Articles</button>
                 <button class="admin-tab-btn" data-tab="videos">Videos</button>
                 <button class="admin-tab-btn" data-tab="gallery">Gallery</button>
                 <button class="admin-tab-btn" data-tab="settings">Settings</button>
@@ -91,6 +92,10 @@
                         <div class="stat-label">Videos</div>
                     </div>
                     <div class="stat-card">
+                        <div class="stat-number" data-stat="articles">0</div>
+                        <div class="stat-label">Articles</div>
+                    </div>
+                    <div class="stat-card">
                         <div class="stat-number" id="storageUsed">0 MB</div>
                         <div class="stat-label">Storage Estimate</div>
                     </div>
@@ -104,6 +109,61 @@
                         <li><strong>Thumbnails folder:</strong> <code>images/thumbnails/</code></li>
                         <li><strong>Repository:</strong> Mantexas/Light-UI</li>
                     </ul>
+                </div>
+            </div>
+
+            <!-- Articles Tab -->
+            <div id="articlesTab" class="admin-tab-content">
+                <h2>Article Management</h2>
+
+                <div class="article-editor-section">
+                    <h3 id="editorTitle">Create New Article</h3>
+
+                    <form id="articleForm" class="article-form">
+                        <div class="form-group">
+                            <label for="articleTitle">Article Title *</label>
+                            <input type="text" id="articleTitle" name="title" required placeholder="Enter article title">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="articleCategory">Category</label>
+                            <input type="text" id="articleCategory" name="category" placeholder="e.g., Photography, Art, Process">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="articleAuthor">Author *</label>
+                            <input type="text" id="articleAuthor" name="author" required placeholder="Your name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="articleExcerpt">Excerpt</label>
+                            <textarea id="articleExcerpt" name="excerpt" rows="2" placeholder="Short preview text (optional)"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="articleBody">Article Content * (Markdown supported)</label>
+                            <textarea id="articleBody" name="body" rows="12" required placeholder="Write your article here. Supports Markdown formatting."></textarea>
+                            <p class="form-hint">Supports: **bold**, *italic*, # Headers, > Quotes, `code`, [links](url)</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="articleThumbnail">Thumbnail URL</label>
+                            <input type="url" id="articleThumbnail" name="thumbnail" placeholder="https://example.com/image.jpg (optional)">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" id="submitBtn" class="btn-primary">Create Article</button>
+                            <button type="reset" id="resetBtn" class="btn-secondary">Clear Form</button>
+                            <button type="button" id="cancelEditBtn" class="btn-secondary" style="display: none;">Cancel Editing</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="articles-list">
+                    <h3>Published Articles</h3>
+                    <div id="articlesList" class="articles-table">
+                        <p class="loading">Loading articles...</p>
+                    </div>
                 </div>
             </div>
 
