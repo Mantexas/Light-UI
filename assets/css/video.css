@@ -1,15 +1,33 @@
 /* ============================================
+   ⚠️  STYLE CONSTITUTION ENFORCEMENT
+   ============================================
+
+   THIS PAGE MUST HAVE:
+   • .video-container with padding: var(--space-lg) var(--space-xl)
+   • @media (max-width: 768px) with padding: var(--space-lg) var(--space-md)
+   • @media (max-width: 480px) with padding: var(--space-lg) var(--space-md)
+
+   READ: ../../../STYLE_CONSTITUTION.md
+   ============================================ */
+
+/* ============================================
    Video Gallery Styles
    ============================================ */
 
 @import 'variables.css';
+
+/* Container */
+.video-container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-xl);
+}
 
 /* Video Grid */
 .video-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--grid-gap);
-  margin: var(--space-xl) 0;
 }
 
 /* Video Item Card */
@@ -174,6 +192,10 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .video-container {
+    padding: var(--space-lg) var(--space-md);
+  }
+
   .video-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--space-sm);
@@ -193,6 +215,10 @@
 }
 
 @media (max-width: 480px) {
+  .video-container {
+    padding: var(--space-lg) var(--space-md);
+  }
+
   .video-grid {
     grid-template-columns: 1fr;
     gap: var(--space-sm);

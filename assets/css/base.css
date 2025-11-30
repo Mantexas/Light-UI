@@ -1,3 +1,18 @@
+/* ============================================
+   ⚠️  STYLE CONSTITUTION - READ STYLE_CONSTITUTION.md
+   ============================================
+
+   MANDATORY RULES:
+   1. All page containers: padding: var(--space-lg) var(--space-xl)
+   2. Responsive padding: @media (max-width: 768px) and (max-width: 480px)
+   3. Footer ONLY in this file, NEVER duplicate elsewhere
+   4. Font: Poppins Light (300), NEVER hardcode
+   5. Use CSS variables for spacing, NEVER hardcoded pixels
+   6. Footer styling is global - DO NOT ADD FOOTER CSS TO OTHER FILES
+
+   Violation = user experience breaks. NO EXCEPTIONS.
+   ============================================ */
+
 /* Google Fonts - Poppins */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
@@ -81,4 +96,78 @@ button {
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* ============================================
+   Footer - Global Alignment
+   ============================================ */
+/* Alignment: Footer uses same container max-width and padding as navigation */
+footer {
+  padding: var(--space-xl) 0;
+  text-align: center;
+  border-top: 1px solid var(--border-color);
+  margin-top: var(--space-2xl);
+  max-width: var(--container-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-xl);
+  padding-right: var(--space-xl);
+}
+
+footer p {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Footer Responsive */
+@media (max-width: 768px) {
+  footer {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+}
+
+@media (max-width: 768px) {
+  footer {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+}
+
+@media (max-width: 480px) {
+  footer {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+
+  footer p {
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* ============================================
+   Page Containers - Unified Styling
+   ============================================ */
+/* All content containers use consistent padding: vertical --space-lg (48px), horizontal --space-xl (96px) */
+/* Containers: .hero, .gallery-container, .about-container, .stories-container, .video-container */
+
+.page-container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-xl);
+}
+
+/* Responsive: tablet (768px and below) */
+@media (max-width: 768px) {
+  .page-container {
+    padding: var(--space-lg) var(--space-md);
+  }
+}
+
+/* Responsive: mobile (480px and below) */
+@media (max-width: 480px) {
+  .page-container {
+    padding: var(--space-lg) var(--space-md);
+  }
 }

@@ -758,26 +758,4 @@ div.thumbnail img {
     }
 
 
-    /* ==========================================
-   FOOTER - Global Alignment
-   ========================================== */
-/* Alignment: Footer uses same container max-width and padding as navigation */
-footer {
-  padding: var(--space-xl) 0;
-  text-align: center;
-  border-top: 1px solid var(--border-color);
-  margin-top: var(--space-2xl);
-  max-width: var(--container-max-width);
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: var(--space-xl);
-  padding-right: var(--space-xl);
-}
-
-footer p {
-  font-size: var(--font-size-xs);
-  color: var(--text-secondary);
-  margin: 0;
-}
-
 }
