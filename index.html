@@ -37,7 +37,7 @@
     <section class="hero">
         <div class="hero-content">
             <h2 class="hero-title fade-in">Immerse yourself in a curated selection of fine art pieces that capture nature's beauty.</h2>
-            <a href="monochrome.html" class="cta-button fade-in">VISIT GALLERY</a>
+            <a href="color.html" class="cta-button fade-in">VISIT GALLERY</a>
             <p class="hero-description fade-in">Meticulously crafted and printed directly on exceptional materials such as aluminum, glass, or the finest Hahnemühle paper, each piece tells its own story, offering a moment of reflection, wonder, and connection, designed to last 100 years.</p>
         </div>
         <div class="hero-gallery" id="heroGallery">
@@ -46,12 +46,19 @@
     </section>
 
     <!-- Footer -->
-    <footer>
+    <footer style="cursor: pointer;" title="Shift+Click for admin">
         <p>&copy; 2024 All rights reserved. Our creative works are protected by copyright laws and the delicate boundaries of human understanding.</p>
     </footer>
 
     <!-- JavaScript Files -->
     <script src="assets/js/home.js"></script>
-    
+    <script>
+        document.querySelector('footer').addEventListener('click', function(e) {
+            if (e.shiftKey) {
+                window.location.href = 'admin.html';
+            }
+        });
+    </script>
+
 </body>
 </html>

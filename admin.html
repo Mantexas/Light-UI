@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Fine Art Collection</title>
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="assets/css/variables.css">
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body class="admin-page">
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="admin-login">
+        <div class="login-container">
+            <div class="login-box">
+                <h1>Admin Panel</h1>
+                <p class="login-subtitle">Fine Art Collection Management</p>
+
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            placeholder="Enter username"
+                            required
+                            autocomplete="off"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter password"
+                            required
+                            autocomplete="off"
+                        >
+                    </div>
+
+                    <button type="submit" class="login-button">Login</button>
+                </form>
+
+                <div id="loginError" class="login-error" style="display: none;"></div>
+
+                <p class="login-help">
+                    <a href="index.html">← Back to Site</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="admin-dashboard" style="display: none;">
+
+        <div class="admin-header">
+            <div class="admin-header-content">
+                <h1>Admin Panel</h1>
+                <p>Manage your fine art collection</p>
+            </div>
+            <button id="logoutBtn" class="logout-button">Logout</button>
+        </div>
+
+        <div class="admin-container">
+
+            <!-- Navigation Tabs -->
+            <div class="admin-tabs">
+                <button class="admin-tab-btn active" data-tab="dashboard">Dashboard</button>
+                <button class="admin-tab-btn" data-tab="videos">Videos</button>
+                <button class="admin-tab-btn" data-tab="gallery">Gallery</button>
+                <button class="admin-tab-btn" data-tab="settings">Settings</button>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboardTab" class="admin-tab-content active">
+                <h2>Dashboard</h2>
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="galleryCount">0</div>
+                        <div class="stat-label">Gallery Images</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="videosCount">0</div>
+                        <div class="stat-label">Videos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="storageUsed">0 MB</div>
+                        <div class="stat-label">Storage Estimate</div>
+                    </div>
+                </div>
+
+                <div class="quick-info">
+                    <h3>Quick Information</h3>
+                    <ul>
+                        <li><strong>Gallery folder:</strong> <code>images/large/</code></li>
+                        <li><strong>Videos folder:</strong> <code>images/videos/large/</code></li>
+                        <li><strong>Thumbnails folder:</strong> <code>images/thumbnails/</code></li>
+                        <li><strong>Repository:</strong> Mantexas/Light-UI</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Videos Tab -->
+            <div id="videosTab" class="admin-tab-content">
+                <h2>Video Management</h2>
+
+                <div class="upload-section">
+                    <h3>Upload Video</h3>
+                    <p class="upload-info">Supported formats: MP4, WebM, MOV, MKV, AVI</p>
+                    <div class="upload-area" id="videoUploadArea">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        <p>Drag and drop video files here or click to browse</p>
+                        <input type="file" id="videoInput" accept="video/*" multiple style="display: none;">
+                    </div>
+                </div>
+
+                <div class="file-list">
+                    <h3>Videos in Library</h3>
+                    <div id="videoList" class="file-grid">
+                        <p class="loading">Loading videos...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gallery Tab -->
+            <div id="galleryTab" class="admin-tab-content">
+                <h2>Gallery Management</h2>
+
+                <div class="upload-section">
+                    <h3>Upload Gallery Images</h3>
+                    <p class="upload-info">Supported formats: JPG, PNG, WebP</p>
+                    <div class="upload-area" id="galleryUploadArea">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        <p>Drag and drop images here or click to browse</p>
+                        <input type="file" id="galleryInput" accept="image/*" multiple style="display: none;">
+                    </div>
+                </div>
+
+                <div class="file-list">
+                    <h3>Images in Gallery</h3>
+                    <div id="galleryList" class="file-grid">
+                        <p class="loading">Loading gallery...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settingsTab" class="admin-tab-content">
+                <h2>Settings</h2>
+
+                <div class="settings-section">
+                    <h3>Admin Credentials</h3>
+                    <div class="settings-info">
+                        <p>To change admin password:</p>
+                        <ol>
+                            <li>Edit <code>admin.js</code> line ~12</li>
+                            <li>Update the credentials object</li>
+                            <li>Change <code>password</code> field to your new password</li>
+                            <li>Reload the page</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>File Management</h3>
+                    <p>To add, delete, or modify files:</p>
+                    <ul>
+                        <li><strong>Videos:</strong> Upload to <code>images/videos/large/</code> via Git or FTP</li>
+                        <li><strong>Gallery:</strong> Upload to <code>images/large/</code> via Git or FTP</li>
+                        <li><strong>Thumbnails:</strong> Add to <code>images/thumbnails/</code> (optional)</li>
+                    </ul>
+                </div>
+
+                <div class="settings-section">
+                    <h3>GitHub API</h3>
+                    <p>This admin panel uses GitHub API to list files. API is rate-limited to 60 requests/hour.</p>
+                    <div class="info-box">
+                        <strong>Rate Limit:</strong> 60 requests per hour (per IP)
+                        <br><strong>Reset:</strong> Resets hourly
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Documentation</h3>
+                    <p>For detailed setup instructions, see:</p>
+                    <a href="HOW_TO_ADD_VIDEOS.md" target="_blank" class="link-button">How to Add Videos</a>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- JavaScript -->
+    <script src="assets/js/admin.js"></script>
+
+</body>
+</html>

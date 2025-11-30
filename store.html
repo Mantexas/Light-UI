@@ -221,10 +221,17 @@
     </div>
 
     <!-- Footer -->
-    <footer>
+    <footer style="cursor: pointer;" title="Shift+Click for admin">
         <p>&copy; 2024 All rights reserved. Our creative works are protected by copyright laws and the delicate boundaries of human understanding.</p>
     </footer>
 
+    <script>
+        document.querySelector('footer').addEventListener('click', function(e) {
+            if (e.shiftKey) {
+                window.location.href = 'admin.html';
+            }
+        });
+    </script>
     <script>
     // Load store gallery
     async function loadStoreGallery() {
