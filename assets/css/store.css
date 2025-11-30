@@ -1,0 +1,204 @@
+/* ============================================
+   ⚠️  STYLE CONSTITUTION ENFORCEMENT
+   ============================================
+
+   THIS PAGE MUST HAVE:
+   • .store-container with padding: var(--space-lg) var(--space-xl)
+   • @media (max-width: 768px) with padding: var(--space-lg) var(--space-md)
+   • @media (max-width: 480px) with padding: var(--space-lg) var(--space-md)
+
+   READ: ../../../STYLE_CONSTITUTION.md
+   ============================================ */
+
+/* ============================================
+   Store Page Styles
+   ============================================ */
+
+@import 'variables.css';
+
+/* Container */
+.store-container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-xl);
+}
+
+/* Store Intro */
+.store-intro {
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+}
+
+.store-intro h1 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-md);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.store-intro p {
+  font-size: var(--font-size-md);
+  color: var(--text-secondary);
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: var(--line-height-relaxed);
+}
+
+/* Store Gallery Grid */
+.store-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-lg);
+  margin-bottom: var(--space-2xl);
+}
+
+/* Store Item */
+.store-item {
+  cursor: pointer;
+  transition: transform var(--transition-normal);
+}
+
+.store-item:hover {
+  transform: scale(1.02);
+}
+
+.store-item img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+}
+
+.store-item-title {
+  margin-top: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+/* Order Form */
+.order-form {
+  max-width: 600px;
+  margin: var(--space-2xl) auto;
+  padding: var(--space-xl);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.order-form h2 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-lg);
+  margin-top: 0;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.form-group {
+  margin-bottom: var(--space-lg);
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: var(--space-xs);
+  font-weight: var(--font-weight-light);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+
+.form-group select,
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: var(--space-md);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  font-weight: var(--font-weight-light);
+  transition: all var(--transition-normal);
+  background: white;
+  color: var(--text-primary);
+}
+
+.form-group select:focus,
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Order Button */
+.order-button {
+  width: 100%;
+  padding: var(--space-md) var(--space-xl);
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  border: 2px solid var(--text-primary);
+  border-radius: 4px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.order-button:hover {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.order-button:active {
+  opacity: 0.8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .store-container {
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  .store-gallery {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .store-item img {
+    height: 250px;
+  }
+
+  .order-form {
+    padding: var(--space-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .store-container {
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  .store-intro h1 {
+    font-size: var(--font-size-lg);
+  }
+
+  .store-intro p {
+    font-size: var(--font-size-sm);
+  }
+
+  .store-item img {
+    height: 200px;
+  }
+
+  .order-form {
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  .form-group {
+    margin-bottom: var(--space-md);
+  }
+}
