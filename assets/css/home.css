@@ -87,7 +87,7 @@
         grid-template-columns: 1fr;
         gap: var(--space-xl);
         min-height: auto;
-        padding: var(--space-xl) var(--space-md);
+        padding: var(--space-lg) var(--space-md);
     }
     
     .hero-gallery {

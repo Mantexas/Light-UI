@@ -113,6 +113,13 @@ footer p {
   }
 }
 
+@media (max-width: 768px) {
+  footer {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+}
+
 @media (max-width: 480px) {
   footer {
     padding-left: var(--space-md);
@@ -121,5 +128,31 @@ footer p {
 
   footer p {
     font-size: var(--font-size-xs);
+  }
+}
+
+/* ============================================
+   Page Containers - Unified Styling
+   ============================================ */
+/* All content containers use consistent padding: vertical --space-lg (48px), horizontal --space-xl (96px) */
+/* Containers: .hero, .gallery-container, .about-container, .stories-container, .video-container */
+
+.page-container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-xl);
+}
+
+/* Responsive: tablet (768px and below) */
+@media (max-width: 768px) {
+  .page-container {
+    padding: var(--space-lg) var(--space-md);
+  }
+}
+
+/* Responsive: mobile (480px and below) */
+@media (max-width: 480px) {
+  .page-container {
+    padding: var(--space-lg) var(--space-md);
   }
 }
