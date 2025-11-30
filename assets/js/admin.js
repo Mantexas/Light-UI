@@ -1,6 +1,6 @@
 /**
- * Admin Panel - Complete Implementation
- * Fully functional content management
+ * Admin Panel - Comprehensive Implementation
+ * Full article editor with live preview, reading time, image management
  */
 
 const ADMIN_CREDENTIALS = {
@@ -208,7 +208,7 @@ class AdminPanel {
     this.showNotification('About content saved successfully!');
   }
 
-  // ==================== ARTICLE EDITOR ====================
+  // ==================== ADVANCED ARTICLE EDITOR ====================
 
   setupArticleEditor() {
     const form = document.getElementById('articleForm');
@@ -221,7 +221,328 @@ class AdminPanel {
       }
     }
 
+    // Setup markdown toolbar
+    this.setupMarkdownToolbar();
+
+    // Setup live preview
+    this.setupLivePreview();
+
+    // Setup featured image selector
+    this.setupFeaturedImageSelector();
+
+    // Load articles list
     this.loadArticlesList();
+  }
+
+  setupMarkdownToolbar() {
+    const toolbar = document.querySelectorAll('.toolbar-btn');
+    const textarea = document.getElementById('articleBody');
+
+    if (!textarea) return;
+
+    toolbar.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const command = btn.dataset.command;
+        this.insertMarkdown(textarea, command);
+        textarea.focus();
+      });
+    });
+  }
+
+  insertMarkdown(textarea, command) {
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
+    const before = textarea.value.substring(0, start);
+    const after = textarea.value.substring(end);
+
+    let result = '';
+    let newCursorPos = start;
+
+    switch (command) {
+      case 'bold':
+        result = before + `**${selectedText || 'bold text'}**` + after;
+        newCursorPos = start + 2;
+        break;
+      case 'italic':
+        result = before + `*${selectedText || 'italic text'}*` + after;
+        newCursorPos = start + 1;
+        break;
+      case 'h1':
+        result = before + `# ${selectedText || 'Heading'}` + after;
+        newCursorPos = start + 2;
+        break;
+      case 'h2':
+        result = before + `## ${selectedText || 'Heading'}` + after;
+        newCursorPos = start + 3;
+        break;
+      case 'link':
+        result = before + `[${selectedText || 'link text'}](url)` + after;
+        break;
+      case 'quote':
+        result = before + `> ${selectedText || 'quote'}` + after;
+        newCursorPos = start + 2;
+        break;
+      case 'code':
+        result = before + `` + `${selectedText || 'code'}` + `` + after;
+        break;
+      case 'ul':
+        const lines = selectedText.split('\n');
+        const bulletedLines = lines.map(line => `* ${line}`).join('\n');
+        result = before + (bulletedLines || '* item') + after;
+        break;
+    }
+
+    textarea.value = result;
+    textarea.selectionStart = textarea.selectionEnd = newCursorPos;
+    this.updateLivePreview();
+  }
+
+  setupLivePreview() {
+    const textarea = document.getElementById('articleBody');
+    const titleInput = document.getElementById('articleTitle');
+
+    if (!textarea) return;
+
+    textarea.addEventListener('input', () => this.updateLivePreview());
+    if (titleInput) {
+      titleInput.addEventListener('input', () => this.updateLivePreview());
+    }
+  }
+
+  updateLivePreview() {
+    const title = document.getElementById('articleTitle').value;
+    const body = document.getElementById('articleBody').value;
+    const preview = document.getElementById('articlePreview');
+
+    if (!preview) return;
+
+    let html = '';
+    if (title) {
+      html += `<h1>${this.escapeHtml(title)}</h1>`;
+    }
+
+    if (body) {
+      html += this.parseMarkdown(body);
+    }
+
+    if (!html) {
+      html = '<p style="color: var(--text-secondary); text-align: center; padding: 32px;">Start typing to see preview...</p>';
+    }
+
+    preview.innerHTML = html;
+
+    // Update word count and reading time
+    this.updateEditorStats();
+  }
+
+  updateEditorStats() {
+    const body = document.getElementById('articleBody').value;
+    const wordCount = body.trim().split(/\s+/).filter(w => w).length;
+    const readingTime = Math.ceil(wordCount / 200); // 200 words per minute
+
+    const wordCountEl = document.getElementById('wordCount');
+    const readingTimeEl = document.getElementById('readingTime');
+
+    if (wordCountEl) wordCountEl.textContent = `${wordCount} words`;
+    if (readingTimeEl) readingTimeEl.textContent = `~ ${readingTime} min read`;
+  }
+
+  setupFeaturedImageSelector() {
+    const openBtn = document.getElementById('openImageLibraryBtn');
+    const uploadBtn = document.getElementById('uploadImageBtn');
+    const clearBtn = document.getElementById('clearImageBtn');
+    const imageInput = document.getElementById('articleImageUpload');
+    const modal = document.getElementById('imageLibraryModal');
+    const modalClose = modal ? modal.querySelector('.modal-close') : null;
+
+    if (openBtn) {
+      openBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.loadImageLibrary();
+        if (modal) modal.classList.add('active');
+      });
+    }
+
+    if (uploadBtn) {
+      uploadBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (imageInput) imageInput.click();
+      });
+    }
+
+    if (imageInput) {
+      imageInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          this.handleImageUpload(file);
+        }
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.clearFeaturedImage();
+      });
+    }
+
+    if (modalClose) {
+      modalClose.addEventListener('click', () => {
+        if (modal) modal.classList.remove('active');
+      });
+    }
+
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
+    }
+  }
+
+  async loadImageLibrary() {
+    const grid = document.getElementById('imageLibraryGrid');
+    if (!grid) return;
+
+    grid.innerHTML = '<p class="loading">Loading images...</p>';
+
+    try {
+      const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery');
+      const folders = await response.json();
+
+      if (!Array.isArray(folders)) {
+        grid.innerHTML = '<p class="loading">No images found</p>';
+        return;
+      }
+
+      let allImages = [];
+
+      for (const folder of folders) {
+        if (folder.type === 'dir') {
+          try {
+            const collResponse = await fetch(folder.url);
+            const files = await collResponse.json();
+            if (Array.isArray(files)) {
+              const images = files.filter(f => this.isImageFile(f.name));
+              allImages = allImages.concat(images.map(img => ({
+                name: img.name,
+                collection: folder.name,
+                url: `images/gallery/${folder.name}/${img.name}`
+              })));
+            }
+          } catch (e) {
+            console.error('Error loading folder:', folder.name);
+          }
+        }
+      }
+
+      if (allImages.length === 0) {
+        grid.innerHTML = '<p class="loading">No images available</p>';
+        return;
+      }
+
+      grid.innerHTML = allImages.map(img => `
+        <div class="image-library-item" data-url="${img.url}" data-name="${img.name}">
+          <img src="${img.url}" alt="${img.name}" loading="lazy">
+        </div>
+      `).join('');
+
+      grid.querySelectorAll('.image-library-item').forEach(item => {
+        item.addEventListener('click', () => this.selectFeaturedImage(item));
+      });
+    } catch (error) {
+      console.error('Error loading image library:', error);
+      grid.innerHTML = '<p class="loading">Error loading images</p>';
+    }
+  }
+
+  selectFeaturedImage(element) {
+    const url = element.dataset.url;
+    const name = element.dataset.name;
+
+    // Remove previous selection
+    document.querySelectorAll('.image-library-item').forEach(item => {
+      item.classList.remove('selected');
+    });
+
+    // Select this item
+    element.classList.add('selected');
+
+    // Update featured image preview
+    const preview = document.getElementById('featuredImagePreview');
+    if (preview) {
+      preview.innerHTML = `<img src="${url}" alt="${name}">`;
+    }
+
+    // Store in hidden input
+    const input = document.getElementById('articleThumbnail');
+    if (input) {
+      input.value = url;
+    }
+
+    // Show clear button
+    const clearBtn = document.getElementById('clearImageBtn');
+    if (clearBtn) {
+      clearBtn.style.display = 'block';
+    }
+
+    // Close modal
+    const modal = document.getElementById('imageLibraryModal');
+    if (modal) {
+      modal.classList.remove('active');
+    }
+  }
+
+  handleImageUpload(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = e.target.result;
+      const imageName = `article-img-${Date.now()}.${file.name.split('.').pop()}`;
+
+      // Store in localStorage (base64)
+      let storedImages = JSON.parse(localStorage.getItem('uploadedImages') || '{}');
+      storedImages[imageName] = data;
+      localStorage.setItem('uploadedImages', JSON.stringify(storedImages));
+
+      // Set as featured image
+      const preview = document.getElementById('featuredImagePreview');
+      if (preview) {
+        preview.innerHTML = `<img src="${data}" alt="${imageName}">`;
+      }
+
+      const input = document.getElementById('articleThumbnail');
+      if (input) {
+        input.value = data;
+      }
+
+      const clearBtn = document.getElementById('clearImageBtn');
+      if (clearBtn) {
+        clearBtn.style.display = 'block';
+      }
+
+      this.showNotification('Image uploaded successfully!');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearFeaturedImage() {
+    const preview = document.getElementById('featuredImagePreview');
+    if (preview) {
+      preview.innerHTML = '<p>No image selected</p>';
+    }
+
+    const input = document.getElementById('articleThumbnail');
+    if (input) {
+      input.value = '';
+    }
+
+    const clearBtn = document.getElementById('clearImageBtn');
+    if (clearBtn) {
+      clearBtn.style.display = 'none';
+    }
   }
 
   handleArticleSubmit(e) {
@@ -230,21 +551,32 @@ class AdminPanel {
     const form = document.getElementById('articleForm');
     const editingId = form.dataset.editingId;
 
-    const article = {
-      id: editingId || Date.now().toString(),
-      title: document.getElementById('articleTitle').value.trim(),
-      category: document.getElementById('articleCategory').value.trim(),
-      author: document.getElementById('articleAuthor').value.trim(),
-      excerpt: document.getElementById('articleExcerpt').value.trim(),
-      body: document.getElementById('articleBody').value.trim(),
-      thumbnail: document.getElementById('articleThumbnail').value.trim(),
-      date: editingId ? this.getArticleById(editingId).date : new Date().toISOString()
-    };
+    const title = document.getElementById('articleTitle').value.trim();
+    const author = document.getElementById('articleAuthor').value.trim();
+    const body = document.getElementById('articleBody').value.trim();
+    const category = document.getElementById('articleCategory').value.trim();
+    const excerpt = document.getElementById('articleExcerpt').value.trim();
+    const thumbnail = document.getElementById('articleThumbnail').value.trim();
 
-    if (!article.title || !article.author || !article.body) {
-      this.showNotification('Please fill in all required fields', 'error');
+    if (!title || !author || !body) {
+      this.showNotification('Please fill in title, author, and content', 'error');
       return;
     }
+
+    // Auto-generate excerpt if not provided
+    const finalExcerpt = excerpt || body.substring(0, 150).replace(/[#*\[\]`]/g, '').trim() + '...';
+
+    const article = {
+      id: editingId || Date.now().toString(),
+      title,
+      category,
+      author,
+      excerpt: finalExcerpt,
+      body,
+      thumbnail,
+      date: editingId ? this.getArticleById(editingId).date : new Date().toISOString(),
+      published: document.getElementById('articlePublished').checked
+    };
 
     let articles = JSON.parse(localStorage.getItem('articles') || '[]');
 
@@ -259,7 +591,15 @@ class AdminPanel {
 
     localStorage.setItem('articles', JSON.stringify(articles));
     form.reset();
+
+    const preview = document.getElementById('articlePreview');
+    if (preview) {
+      preview.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 32px;">Start typing to see preview...</p>';
+    }
+
+    this.clearFeaturedImage();
     this.loadArticlesList();
+    this.loadStats();
   }
 
   loadArticlesList() {
@@ -313,15 +653,41 @@ class AdminPanel {
     document.getElementById('articleAuthor').value = article.author;
     document.getElementById('articleExcerpt').value = article.excerpt || '';
     document.getElementById('articleBody').value = article.body;
-    document.getElementById('articleThumbnail').value = article.thumbnail || '';
+    document.getElementById('articlePublished').checked = article.published !== false;
+
+    // Set featured image
+    if (article.thumbnail) {
+      const preview = document.getElementById('featuredImagePreview');
+      if (preview) {
+        preview.innerHTML = `<img src="${article.thumbnail}" alt="featured">`;
+      }
+
+      const input = document.getElementById('articleThumbnail');
+      if (input) {
+        input.value = article.thumbnail;
+      }
+
+      const clearBtn = document.getElementById('clearImageBtn');
+      if (clearBtn) {
+        clearBtn.style.display = 'block';
+      }
+    }
 
     const form = document.getElementById('articleForm');
     form.dataset.editingId = id;
-    document.getElementById('editorTitle').textContent = 'Edit Article';
-    document.getElementById('submitBtn').textContent = 'Update Article';
-    document.getElementById('cancelEditBtn').style.display = 'block';
+    const editorTitle = document.getElementById('editorTitle');
+    const submitBtn = document.getElementById('submitBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
 
-    document.querySelector('.article-editor-section').scrollIntoView({ behavior: 'smooth' });
+    if (editorTitle) editorTitle.textContent = 'Edit Article';
+    if (submitBtn) submitBtn.textContent = 'Update Article';
+    if (cancelEditBtn) cancelEditBtn.style.display = 'block';
+
+    this.updateLivePreview();
+    const editorLeft = document.querySelector('.article-editor-left');
+    if (editorLeft) {
+      editorLeft.scrollIntoView({ behavior: 'smooth' });
+    }
   }
 
   deleteArticle(id) {
@@ -329,6 +695,7 @@ class AdminPanel {
     articles = articles.filter(a => a.id !== id);
     localStorage.setItem('articles', JSON.stringify(articles));
     this.loadArticlesList();
+    this.loadStats();
     this.showNotification('Article deleted successfully!');
   }
 
@@ -336,9 +703,21 @@ class AdminPanel {
     const form = document.getElementById('articleForm');
     form.reset();
     delete form.dataset.editingId;
-    document.getElementById('editorTitle').textContent = 'Create New Article';
-    document.getElementById('submitBtn').textContent = 'Create Article';
-    document.getElementById('cancelEditBtn').style.display = 'none';
+
+    const editorTitle = document.getElementById('editorTitle');
+    const submitBtn = document.getElementById('submitBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+
+    if (editorTitle) editorTitle.textContent = 'Create New Article';
+    if (submitBtn) submitBtn.textContent = 'Create Article';
+    if (cancelEditBtn) cancelEditBtn.style.display = 'none';
+
+    const preview = document.getElementById('articlePreview');
+    if (preview) {
+      preview.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 32px;">Start typing to see preview...</p>';
+    }
+
+    this.clearFeaturedImage();
   }
 
   getArticleById(id) {
@@ -496,15 +875,55 @@ class AdminPanel {
     if (files.length === 0) return;
 
     this.showNotification(
-      `${files.length} file${files.length !== 1 ? 's' : ''} selected. ` +
-      `To upload, push to GitHub:\n\n` +
-      `Videos: push to images/videos/large/\n` +
-      `Gallery: push to images/gallery/[collection-name]/`,
+      `${files.length} file${files.length !== 1 ? 's' : ''} selected. Push to GitHub:\n\nVideos: images/videos/large/\nGallery: images/gallery/[collection-name]/`,
       'info'
     );
   }
 
   // ==================== UTILITY FUNCTIONS ====================
+
+  parseMarkdown(text) {
+    if (!text) return '';
+
+    let html = this.escapeHtml(text);
+
+    // Headers
+    html = html.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+    html = html.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
+
+    // Bold
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    // Italic
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+    // Links
+    html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+    // Code blocks
+    html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+
+    // Inline code
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+    // Blockquotes
+    html = html.replace(/^> (.*?)$/gm, '<blockquote>$1</blockquote>');
+
+    // Lists
+    html = html.replace(/^\* (.*?)$/gm, '<li>$1</li>');
+    html = html.replace(/(<li>.*?<\/li>)/s, '<ul>$1</ul>');
+
+    // Paragraphs
+    html = html.split('\n\n').map(para => {
+      if (!para.match(/^<[^>]+>/) && para.trim()) {
+        return `<p>${para}</p>`;
+      }
+      return para;
+    }).join('\n');
+
+    return html;
+  }
 
   isVideoFile(filename) {
     const ext = filename.split('.').pop().toLowerCase();
