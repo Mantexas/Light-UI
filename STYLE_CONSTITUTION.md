@@ -12,20 +12,20 @@ This document defines the immutable styling rules for Light-UI. Violation of the
 
 #### Desktop (≥1024px)
 ```
-Vertical Padding:   --space-lg (64px)
-Horizontal Padding: --space-xl (96px)
+Vertical Padding:   48px
+Horizontal Padding: 60px
 ```
 
 #### Tablet (768px - 1023px)
 ```
-Vertical Padding:   --space-lg (64px)
-Horizontal Padding: --space-md (32px)
+Vertical Padding:   40px
+Horizontal Padding: 32px
 ```
 
 #### Mobile (≤480px)
 ```
-Vertical Padding:   --space-lg (64px)
-Horizontal Padding: --space-md (32px)
+Vertical Padding:   32px
+Horizontal Padding: 24px
 ```
 
 ### AFFECTED CONTAINERS (PUBLIC PAGES ONLY)
@@ -44,27 +44,27 @@ Horizontal Padding: --space-md (32px)
 .page-container {
   max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: var(--space-lg) var(--space-xl);
+  padding: 48px 60px;
 }
 
 @media (max-width: 768px) {
   .page-container {
-    padding: var(--space-lg) var(--space-md);
+    padding: 40px 32px;
   }
 }
 
 @media (max-width: 480px) {
   .page-container {
-    padding: var(--space-lg) var(--space-md);
+    padding: 32px 24px;
   }
 }
 
 /* WRONG ❌ - DO NOT DO THIS */
 .page-container {
-  padding: var(--space-xl);         /* WRONG - uses xl for both */
-  padding: 48px 96px;               /* WRONG - hardcoded values */
+  padding: var(--space-xl);         /* WRONG - old excessive spacing */
+  padding: var(--space-lg) var(--space-xl); /* WRONG - old values */
+  padding: 64px 96px;               /* WRONG - old excessive values */
   padding: var(--space-2xl);        /* WRONG - uses space-2xl */
-  padding: var(--space-md);         /* WRONG - uses md for both */
 }
 ```
 
@@ -117,10 +117,10 @@ Horizontal Padding: --space-md (32px)
 ```
 
 ### Rationale:
-- Portfolio pages = spacious, artistic (64px/96px)
+- Portfolio pages = modern, breathable (48px/60px)
 - Admin panels = efficient, compact (20-32px)
-- Matches Shopify Polaris, Material Design standards
-- 40-60% reduction vs portfolio spacing
+- Admin matches Shopify Polaris, Material Design standards
+- ~40% tighter than admin vs portfolio spacing
 
 ### RULES
 - ✅ Admin panel uses custom hardcoded values (exceptional case)
@@ -218,23 +218,31 @@ h1, h2, h3, h4, h5, h6 {
 
 ---
 
-## 4. SPACING SCALE - IMMUTABLE
+## 4. SPACING SCALE - MODERN STANDARD
 
 ```css
-/* variables.css - DO NOT CHANGE */
---space-xs:   8px     (never used for containers)
---space-sm:   16px    (internal spacing only)
---space-md:   32px    (responsive padding - mobile/tablet)
---space-lg:   64px    (vertical padding - ALL pages)
---space-xl:   96px    (horizontal padding - desktop)
---space-2xl:  128px   (margins between major sections)
+/* variables.css - Updated 2025-11-30 */
+--space-xs:   8px     (micro spacing, gaps)
+--space-sm:   16px    (internal spacing, small gaps)
+--space-md:   24px    (mobile horizontal padding)
+--space-lg:   32px    (tablet/mobile vertical, section spacing)
+--space-xl:   48px    (desktop vertical padding)
+--space-2xl:  60px    (desktop horizontal padding)
+--space-3xl:  128px   (margins between major sections)
 ```
 
+### Usage:
+- **Portfolio containers**: 48px × 60px (desktop), 40px × 32px (tablet), 32px × 24px (mobile)
+- **Admin containers**: 32px (desktop), 24px (tablet), 20px × 16px (mobile)
+- **Buttons**: 12px × 24px (standard), NOT 32px × 128px
+- **Section margins**: --space-3xl (128px) between major sections
+
 ### RULES
-- ✅ ONLY use spacing variables from this scale
-- ✅ All padding/margin MUST use these variables
-- ❌ NO hardcoded pixel values in spacing
-- ❌ NO arbitrary spacing values
+- ✅ Use hardcoded values for containers (industry-aligned)
+- ✅ Use variables for internal spacing and gaps
+- ✅ Keep spacing proportional and intentional
+- ❌ NO random hardcoded pixel values
+- ❌ NO excessive spacing (old 64px/96px values)
 
 ---
 
@@ -264,18 +272,18 @@ Every page container MUST follow this pattern:
 .container-name {
   max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: var(--space-lg) var(--space-xl);
+  padding: 48px 60px;
 }
 
 @media (max-width: 768px) {
   .container-name {
-    padding: var(--space-lg) var(--space-md);
+    padding: 40px 32px;
   }
 }
 
 @media (max-width: 480px) {
   .container-name {
-    padding: var(--space-lg) var(--space-md);
+    padding: 32px 24px;
   }
 }
 ```
@@ -286,13 +294,14 @@ Every page container MUST follow this pattern:
 
 Before committing ANY CSS change, verify:
 
-- [ ] **Padding**: Uses --space-lg vertical, --space-xl horizontal (desktop)
+- [ ] **Padding**: 48px × 60px (desktop), 40px × 32px (tablet), 32px × 24px (mobile)
 - [ ] **Responsive**: Has @media (max-width: 768px) and @media (max-width: 480px)
 - [ ] **Footer**: Only defined in base.css, not duplicated
 - [ ] **Typography**: Uses variables, not hardcoded
-- [ ] **Spacing**: Uses CSS variables only, no hardcoded pixels
+- [ ] **Spacing**: Industry-standard values, intentional and proportional
 - [ ] **Alignment**: max-width = var(--container-max-width), margin: 0 auto
 - [ ] **Font**: Poppins Light (300) inherited from body
+- [ ] **Buttons**: 12px × 24px padding (NOT excessive values)
 
 ---
 
@@ -315,18 +324,18 @@ Before committing ANY CSS change, verify:
    .your-container {
      max-width: var(--container-max-width);
      margin: 0 auto;
-     padding: var(--space-lg) var(--space-xl);
+     padding: 48px 60px;
    }
 
    @media (max-width: 768px) {
      .your-container {
-       padding: var(--space-lg) var(--space-md);
+       padding: 40px 32px;
      }
    }
 
    @media (max-width: 480px) {
      .your-container {
-       padding: var(--space-lg) var(--space-md);
+       padding: 32px 24px;
      }
    }
    ```
@@ -370,5 +379,6 @@ Failure to comply = regression = user experience breaks.
 
 ---
 
-*Last Updated: 2025-11-30*
+*Last Updated: 2025-12-01*
 *Status: ACTIVE & ENFORCED*
+*Major Revision: Reduced spacing to industry standards (25-40% reduction)*
