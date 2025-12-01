@@ -167,7 +167,7 @@
 .admin-header {
   background: white;
   border-bottom: 1px solid var(--border);
-  padding: var(--space-xl) var(--space-3xl);
+  padding: var(--space-md) var(--space-xl);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -220,7 +220,7 @@
 .admin-container {
   max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: var(--space-2xl) var(--space-3xl);
+  padding: var(--space-lg) var(--space-xl);
 }
 
 /* ========== TABS - IMPROVED ========== */
@@ -237,7 +237,7 @@
 }
 
 .admin-tab-btn {
-  padding: var(--space-md) var(--space-xl);
+  padding: var(--space-sm) var(--space-lg);
   background: transparent;
   border: none;
   border-radius: var(--radius-md);
@@ -1419,11 +1419,11 @@
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-lg);
-    padding: var(--space-lg) var(--space-xl);
+    padding: var(--space-md) var(--space-lg);
   }
 
   .admin-container {
-    padding: var(--space-xl);
+    padding: var(--space-lg) var(--space-md);
   }
 
   .admin-tabs {
@@ -1477,7 +1477,7 @@
 
 @media (max-width: 480px) {
   .admin-header {
-    padding: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
   }
 
   .admin-header h1 {
@@ -1485,7 +1485,7 @@
   }
 
   .admin-container {
-    padding: var(--space-md);
+    padding: var(--space-lg) var(--space-md);
   }
 
   .admin-tabs {
