@@ -28,14 +28,15 @@ Vertical Padding:   --space-lg (64px)
 Horizontal Padding: --space-md (32px)
 ```
 
-### AFFECTED CONTAINERS (ALL PAGES)
+### AFFECTED CONTAINERS (PUBLIC PAGES ONLY)
 - `.hero` (index.html)
 - `.gallery-container` (color.html)
 - `.about-container` (artist.html)
 - `.stories-container` (stories.html)
 - `.video-container` (film.html)
 - `.store-container` (store.html)
-- `.admin-container` (admin.html)
+
+**EXCEPTION:** `.admin-container` - See Admin Panel Override below
 
 ### VERIFICATION
 ```css
@@ -66,6 +67,67 @@ Horizontal Padding: --space-md (32px)
   padding: var(--space-md);         /* WRONG - uses md for both */
 }
 ```
+
+---
+
+## 1.5 ADMIN PANEL OVERRIDE - DENSE UI EXCEPTION
+
+**Context:** Admin panels are data-dense interfaces requiring tighter spacing than portfolio pages. This override follows industry standards (Shopify Polaris, Material Design, Anthropic Claude).
+
+### Admin Panel Spacing (admin.html ONLY):
+
+#### Desktop (≥1024px)
+```css
+/* Admin Header */
+.admin-header {
+  padding: 20px 32px;  /* NOT var(--space-lg) */
+}
+
+/* Admin Container */
+.admin-container {
+  padding: 32px;  /* NOT var(--space-lg) var(--space-xl) */
+}
+
+/* Admin Tabs/Buttons */
+.admin-tab-btn {
+  padding: 10px 20px;  /* Compact, not --space-md */
+}
+```
+
+#### Tablet (768px - 1023px)
+```css
+.admin-header {
+  padding: 16px 24px;
+}
+
+.admin-container {
+  padding: 24px;
+}
+```
+
+#### Mobile (≤480px)
+```css
+.admin-header {
+  padding: 12px 16px;
+}
+
+.admin-container {
+  padding: 20px 16px;
+}
+```
+
+### Rationale:
+- Portfolio pages = spacious, artistic (64px/96px)
+- Admin panels = efficient, compact (20-32px)
+- Matches Shopify Polaris, Material Design standards
+- 40-60% reduction vs portfolio spacing
+
+### RULES
+- ✅ Admin panel uses custom hardcoded values (exceptional case)
+- ✅ All OTHER pages follow standard Constitution spacing
+- ✅ Admin spacing based on industry best practices
+- ❌ DO NOT apply admin spacing to public pages
+- ❌ DO NOT apply portfolio spacing to admin panel
 
 ---
 
