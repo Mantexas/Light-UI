@@ -322,25 +322,92 @@ class GalleryCollections {
   }
 
   /**
-   * Render gallery grid
+   * Render featured image + thumbnail carousel
    */
   renderGalleryGrid() {
-    this.galleryGrid.innerHTML = this.images
+    if (this.images.length === 0) return;
+
+    this.currentImageIndex = 0;
+
+    // Set up featured image
+    const featuredImage = document.getElementById('featuredImage');
+    const thumbnailCarousel = document.getElementById('thumbnailCarousel');
+
+    if (!featuredImage || !thumbnailCarousel) return;
+
+    // Show first image as featured
+    featuredImage.src = this.images[0].url;
+    featuredImage.alt = this.images[0].name;
+
+    // Click featured image to open lightbox
+    featuredImage.onclick = () => this.openLightbox(this.currentImageIndex);
+
+    // Render thumbnails
+    thumbnailCarousel.innerHTML = this.images
       .map((image, index) => `
-        <div class="gallery-item" data-index="${index}">
+        <div class="thumbnail-item ${index === 0 ? 'active' : ''}" data-index="${index}">
           <img src="${image.thumb}" alt="${this.escapeHtml(image.name)}" loading="lazy">
         </div>
       `).join('');
 
-    this.imageCounter.textContent = `${this.images.length} image${this.images.length !== 1 ? 's' : ''}`;
-
-    // Add click handlers for lightbox
-    document.querySelectorAll('.gallery-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const index = parseInt(item.dataset.index);
-        this.openLightbox(index);
+    // Add thumbnail click handlers
+    document.querySelectorAll('.thumbnail-item').forEach(thumb => {
+      thumb.addEventListener('click', () => {
+        const index = parseInt(thumb.dataset.index);
+        this.showFeaturedImage(index);
       });
     });
+
+    // Carousel navigation
+    const carouselPrev = document.getElementById('carouselPrev');
+    const carouselNext = document.getElementById('carouselNext');
+
+    if (carouselPrev) {
+      carouselPrev.onclick = () => this.scrollCarousel(-1);
+    }
+
+    if (carouselNext) {
+      carouselNext.onclick = () => this.scrollCarousel(1);
+    }
+
+    this.imageCounter.textContent = `${this.images.length} image${this.images.length !== 1 ? 's' : ''}`;
+  }
+
+  /**
+   * Show featured image at index
+   */
+  showFeaturedImage(index) {
+    if (!this.images[index]) return;
+
+    this.currentImageIndex = index;
+
+    const featuredImage = document.getElementById('featuredImage');
+    if (featuredImage) {
+      featuredImage.src = this.images[index].url;
+      featuredImage.alt = this.images[index].name;
+    }
+
+    // Update active thumbnail
+    document.querySelectorAll('.thumbnail-item').forEach((thumb, i) => {
+      thumb.classList.toggle('active', i === index);
+    });
+
+    // Scroll thumbnail into view
+    const activeThumb = document.querySelector('.thumbnail-item.active');
+    if (activeThumb) {
+      activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }
+
+  /**
+   * Scroll carousel
+   */
+  scrollCarousel(direction) {
+    const carousel = document.getElementById('thumbnailCarousel');
+    if (!carousel) return;
+
+    const scrollAmount = 150 * direction;
+    carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
   }
 
   /**

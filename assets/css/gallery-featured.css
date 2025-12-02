@@ -1,0 +1,154 @@
+/* Featured Image & Thumbnail Carousel Layout */
+
+/* Featured Image Display */
+.featured-image-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto var(--space-xl);
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+}
+
+.featured-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.featured-image:hover {
+  transform: scale(1.01);
+}
+
+/* Thumbnail Carousel */
+.thumbnail-carousel-wrapper {
+  position: relative;
+  margin-bottom: 32px;
+  padding: 0 50px;
+}
+
+.thumbnail-carousel {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 12px 0;
+  scrollbar-width: thin;
+}
+
+.thumbnail-carousel::-webkit-scrollbar {
+  height: 8px;
+}
+
+.thumbnail-carousel::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.thumbnail-carousel::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.thumbnail-carousel::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+.thumbnail-item {
+  min-width: 120px;
+  height: 80px;
+  cursor: pointer;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 3px solid transparent;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  background: #f5f5f5;
+}
+
+.thumbnail-item:hover {
+  border-color: #000;
+  transform: scale(1.05);
+}
+
+.thumbnail-item.active {
+  border-color: #000;
+  box-shadow: 0 0 0 1px #000;
+}
+
+.thumbnail-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.carousel-nav:hover {
+  background: white;
+  border-color: #000;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-prev {
+  left: 0;
+}
+
+.carousel-next {
+  right: 0;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .thumbnail-carousel-wrapper {
+    padding: 0 35px;
+  }
+
+  .thumbnail-item {
+    min-width: 100px;
+    height: 70px;
+  }
+
+  .carousel-nav {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+  }
+
+  .featured-image-container {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+@media (max-width: 480px) {
+  .thumbnail-carousel-wrapper {
+    padding: 0 25px;
+  }
+
+  .thumbnail-item {
+    min-width: 80px;
+    height: 60px;
+  }
+}
