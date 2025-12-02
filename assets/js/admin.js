@@ -795,95 +795,85 @@ class AdminPanel {
   // ==================== GALLERY MANAGEMENT ====================
 
   setupGalleryManagement() {
-    // Initialize on first load
-    if (localStorage.getItem('galleries') === null) {
-      this.initializeSampleGalleries();
-    }
+    // Load actual images from GitHub
+    this.loadRealGalleryImages();
+  }
 
-    // Load initial gallery data
-    this.loadGalleries();
+  async loadRealGalleryImages() {
+    const grid = document.getElementById('collectionImagesGrid');
+    if (!grid) return;
 
-    // Setup event listeners
-    const newCollectionBtn = document.getElementById('newCollectionBtn');
-    const createCollectionBtn = document.getElementById('createCollectionBtn');
-    const cancelCollectionBtn = document.getElementById('cancelCollectionBtn');
-    const galleryInput = document.getElementById('galleryInput');
-    const galleryUploadArea = document.getElementById('galleryUploadArea');
-    const sortGallery = document.getElementById('sortGallery');
-    const selectAllImages = document.getElementById('selectAllImages');
-    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
-    const renameCollectionBtn = document.getElementById('renameCollectionBtn');
-    const confirmRenameBtn = document.getElementById('confirmRenameBtn');
-    const cancelRenameBtn = document.getElementById('cancelRenameBtn');
-    const deleteCollectionBtn = document.getElementById('deleteCollectionBtn');
+    grid.innerHTML = '<p class="loading">Loading gallery images...</p>';
 
-    if (newCollectionBtn) {
-      newCollectionBtn.addEventListener('click', () => this.showNewCollectionForm());
-    }
-    if (createCollectionBtn) {
-      createCollectionBtn.addEventListener('click', () => this.createCollection());
-    }
-    if (cancelCollectionBtn) {
-      cancelCollectionBtn.addEventListener('click', () => this.hideNewCollectionForm());
-    }
+    try {
+      const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images');
+      const folders = await response.json();
 
-    if (galleryUploadArea) {
-      galleryUploadArea.addEventListener('click', () => galleryInput?.click());
-      galleryUploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        galleryUploadArea.classList.add('drag-over');
-      });
-      galleryUploadArea.addEventListener('dragleave', () => {
-        galleryUploadArea.classList.remove('drag-over');
-      });
-      galleryUploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        galleryUploadArea.classList.remove('drag-over');
-        if (e.dataTransfer.files.length > 0) {
-          this.handleGalleryUpload(e.dataTransfer.files);
+      if (!Array.isArray(folders)) {
+        grid.innerHTML = '<p class="loading">No collections found.</p>';
+        return;
+      }
+
+      const collections = folders.filter(f => f.type === 'dir' && f.name !== 'homepage');
+
+      if (collections.length === 0) {
+        grid.innerHTML = '<p class="loading">No collections. Create folders in images/</p>';
+        return;
+      }
+
+      let allImages = [];
+
+      // Load images from all collections
+      for (const collection of collections) {
+        try {
+          const collResponse = await fetch(collection.url);
+          const files = await collResponse.json();
+          if (Array.isArray(files)) {
+            const images = files.filter(f => this.isImageFile(f.name));
+            allImages = allImages.concat(images.map(img => ({
+              name: img.name,
+              collection: collection.name,
+              size: img.size,
+              url: `images/${collection.name}/${img.name}`
+            })));
+          }
+        } catch (e) {
+          console.error('Error loading collection:', collection.name);
         }
-      });
-    }
+      }
 
-    if (galleryInput) {
-      galleryInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-          this.handleGalleryUpload(e.target.files);
-        }
-      });
-    }
+      if (allImages.length === 0) {
+        grid.innerHTML = '<p class="loading">No images in any collection.</p>';
+        return;
+      }
 
-    if (sortGallery) {
-      sortGallery.addEventListener('change', () => this.renderCurrentCollectionImages());
-    }
+      // Render with thumbnails
+      grid.innerHTML = allImages.map(file => `
+        <div class="gallery-image-item">
+          <img src="${file.url}" alt="${this.escapeHtml(file.name)}" loading="lazy">
+          <div class="gallery-image-info">
+            <div class="gallery-image-name" title="${this.escapeHtml(file.name)}">${this.escapeHtml(file.name)}</div>
+            <div class="gallery-image-meta">
+              <span class="gallery-image-collection">${this.escapeHtml(file.collection)}</span>
+              <span class="gallery-image-size">${this.formatFileSize(file.size)}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
 
-    if (selectAllImages) {
-      selectAllImages.addEventListener('change', (e) => {
-        document.querySelectorAll('.gallery-image-checkbox').forEach(checkbox => {
-          checkbox.checked = e.target.checked;
+      // Add click handlers to view in lightbox
+      document.querySelectorAll('.gallery-image-item').forEach((item, index) => {
+        item.addEventListener('click', () => {
+          const allUrls = allImages.map(img => img.url);
+          if (window.AdvancedLightbox) {
+            window.AdvancedLightbox.open(allImages[index].url, allUrls);
+          }
         });
-        this.updateDeleteSelectedButton();
       });
-    }
 
-    if (deleteSelectedBtn) {
-      deleteSelectedBtn.addEventListener('click', () => this.deleteSelectedImages());
-    }
-
-    if (renameCollectionBtn) {
-      renameCollectionBtn.addEventListener('click', () => this.showRenameForm());
-    }
-
-    if (confirmRenameBtn) {
-      confirmRenameBtn.addEventListener('click', () => this.confirmRenameCollection());
-    }
-
-    if (cancelRenameBtn) {
-      cancelRenameBtn.addEventListener('click', () => this.hideRenameForm());
-    }
-
-    if (deleteCollectionBtn) {
-      deleteCollectionBtn.addEventListener('click', () => this.deleteCurrentCollection());
+    } catch (error) {
+      console.error('Error loading gallery:', error);
+      grid.innerHTML = '<p class="loading">Error loading gallery.</p>';
     }
   }
 
