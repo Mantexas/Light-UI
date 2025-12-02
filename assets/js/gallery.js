@@ -59,12 +59,17 @@ class GalleryCollections {
     }
 
     this.collections = await Promise.all(
-      folders.map(async (folder) => ({
-        name: folder.name,
-        path: folder.path,
-        url: folder.url,
-        imageCount: await this.getCollectionImageCountGithub(folder.name)
-      }))
+      folders.map(async (folder) => {
+        const imageCount = await this.getCollectionImageCountGithub(folder.name);
+        const firstImage = await this.getFirstImageFromCollection(folder.name);
+        return {
+          name: folder.name,
+          path: folder.path,
+          url: folder.url,
+          imageCount: imageCount,
+          thumbnail: firstImage
+        };
+      })
     );
 
     if (this.collections.length > 0) {
@@ -180,6 +185,29 @@ class GalleryCollections {
   }
 
   /**
+   * Get first image from a collection for thumbnail
+   */
+  async getFirstImageFromCollection(collectionName) {
+    try {
+      const apiUrl = `https://api.github.com/repos/Mantexas/Light-UI/contents/images/${collectionName}`;
+      const response = await fetch(apiUrl);
+
+      if (!response.ok) return null;
+
+      const files = await response.json();
+      if (!Array.isArray(files)) return null;
+
+      const images = files.filter(f => this.isImageFile(f.name));
+      if (images.length === 0) return null;
+
+      // Return path to first image
+      return `images/${collectionName}/${images[0].name}`;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  /**
    * Render collection cards
    */
   renderCollections() {
@@ -187,7 +215,9 @@ class GalleryCollections {
       .map((collection) => `
         <div class="collection-card" data-collection="${collection.name}">
           <div class="collection-thumbnail">
-            📸
+            ${collection.thumbnail
+              ? `<img src="${collection.thumbnail}" alt="${this.escapeHtml(collection.name)}" loading="lazy">`
+              : '<div class="placeholder-thumbnail"></div>'}
           </div>
           <div class="collection-info">
             <h3 class="collection-name">${this.escapeHtml(collection.name)}</h3>
