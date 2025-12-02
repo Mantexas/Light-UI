@@ -78,7 +78,7 @@ class GalleryCollections {
    * Local detection - scan for any folder with images
    */
   async detectLocal() {
-    const commonFolders = ['Vilnius', 'Sample', 'Gallery', 'Photography', 'Art', 'Portfolio'];
+    const commonFolders = ['Vilnius', 'Sample', 'Gallery', 'Photography', 'Art', 'Portfolio', 'Travel', 'Nature'];
 
     const detectedCollections = [];
 
@@ -88,7 +88,7 @@ class GalleryCollections {
       if (imageCount > 0) {
         detectedCollections.push({
           name: folderName,
-          path: `images/gallery/${folderName}`,
+          path: `images/${folderName}`,
           imageCount: imageCount
         });
       }
@@ -106,22 +106,42 @@ class GalleryCollections {
   }
 
   /**
-   * Count images in a local folder
+   * Count images in a local folder - now uses directory listing API
    */
   async getImageCountLocal(folderName) {
+    try {
+      // Try to fetch directory listing (works with Python server or Node static-server)
+      const response = await fetch(`images/${folderName}/`);
+      const text = await response.text();
+
+      // Parse HTML directory listing for image files
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, 'text/html');
+      const links = Array.from(doc.querySelectorAll('a'));
+
+      const imageFiles = links
+        .map(a => a.getAttribute('href'))
+        .filter(href => href && this.isImageFile(href) && !href.startsWith('..'));
+
+      if (imageFiles.length > 0) {
+        return imageFiles.length;
+      }
+    } catch (error) {
+      console.log(`Directory listing failed for ${folderName}, trying pattern detection`);
+    }
+
+    // Fallback: pattern-based detection for numbered images
     let count = 0;
-    // Try loading up to 100 images with common naming
     for (let i = 0; i < 100; i++) {
-      const result = await this.imageExists(`images/gallery/${folderName}/image${i}.jpg`) ||
-                     await this.imageExists(`images/gallery/${folderName}/photo${i}.jpg`) ||
-                     await this.imageExists(`images/gallery/${folderName}/${i}.jpg`) ||
-                     await this.imageExists(`images/gallery/${folderName}/img${i}.png`) ||
-                     await this.imageExists(`images/gallery/${folderName}/${folderName}${i}.jpg`);
+      const result = await this.imageExists(`images/${folderName}/image${i}.jpg`) ||
+                     await this.imageExists(`images/${folderName}/photo${i}.jpg`) ||
+                     await this.imageExists(`images/${folderName}/${i}.jpg`) ||
+                     await this.imageExists(`images/${folderName}/img${i}.png`) ||
+                     await this.imageExists(`images/${folderName}/${folderName}${i}.jpg`);
 
       if (result) {
         count++;
       } else if (i > 10) {
-        // Stop checking after finding gaps
         break;
       }
     }
@@ -204,9 +224,15 @@ class GalleryCollections {
    */
   async loadCollectionImages(collectionName) {
     try {
-      // Try GitHub API first
-      const apiUrl = `https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery/${collectionName}`;
-      const response = await fetch(apiUrl);
+      // Try GitHub API first (check both images/ and images/gallery/)
+      let apiUrl = `https://api.github.com/repos/Mantexas/Light-UI/contents/images/${collectionName}`;
+      let response = await fetch(apiUrl);
+
+      if (!response.ok) {
+        // Try gallery subfolder as fallback
+        apiUrl = `https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery/${collectionName}`;
+        response = await fetch(apiUrl);
+      }
 
       if (response.ok) {
         const files = await response.json();
@@ -214,10 +240,11 @@ class GalleryCollections {
           ? files.filter(f => this.isImageFile(f.name))
           : [];
 
+        const basePath = apiUrl.includes('/gallery/') ? 'images/gallery' : 'images';
         this.images = imageFiles.map(file => ({
           name: file.name,
-          url: `images/gallery/${collectionName}/${file.name}`,
-          thumb: `images/gallery/${collectionName}/${file.name}`
+          url: `${basePath}/${collectionName}/${file.name}`,
+          thumb: `${basePath}/${collectionName}/${file.name}`
         }));
 
         this.renderGalleryGrid();
@@ -232,20 +259,48 @@ class GalleryCollections {
   }
 
   /**
-   * Load images from local folder
+   * Load images from local folder - uses directory listing
    */
   async loadCollectionImagesLocal(collectionName) {
     const imageFiles = [];
 
-    // Try various naming patterns
+    try {
+      // Try to fetch directory listing (works with local dev servers)
+      const response = await fetch(`images/${collectionName}/`);
+      const text = await response.text();
+
+      // Parse HTML directory listing for image files
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, 'text/html');
+      const links = Array.from(doc.querySelectorAll('a'));
+
+      const detectedImages = links
+        .map(a => a.getAttribute('href'))
+        .filter(href => href && this.isImageFile(href) && !href.startsWith('..'))
+        .map(filename => ({
+          name: filename,
+          url: `images/${collectionName}/${filename}`,
+          thumb: `images/${collectionName}/${filename}`
+        }));
+
+      if (detectedImages.length > 0) {
+        this.images = detectedImages;
+        this.renderGalleryGrid();
+        return;
+      }
+    } catch (error) {
+      console.log('Directory listing failed, trying pattern detection...');
+    }
+
+    // Fallback: Try various naming patterns
     const patterns = [
-      (i) => `images/gallery/${collectionName}/image${i}.jpg`,
-      (i) => `images/gallery/${collectionName}/photo${i}.jpg`,
-      (i) => `images/gallery/${collectionName}/${i}.jpg`,
-      (i) => `images/gallery/${collectionName}/img${i}.png`,
-      (i) => `images/gallery/${collectionName}/${collectionName}${i}.jpg`,
-      (i) => `images/gallery/${collectionName}/image${i}.png`,
-      (i) => `images/gallery/${collectionName}/photo${i}.png`,
+      (i) => `images/${collectionName}/image${i}.jpg`,
+      (i) => `images/${collectionName}/photo${i}.jpg`,
+      (i) => `images/${collectionName}/${i}.jpg`,
+      (i) => `images/${collectionName}/img${i}.png`,
+      (i) => `images/${collectionName}/${collectionName}${i}.jpg`,
+      (i) => `images/${collectionName}/image${i}.png`,
+      (i) => `images/${collectionName}/photo${i}.png`,
     ];
 
     // Try to load images - check up to 500 possible images

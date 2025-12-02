@@ -103,21 +103,19 @@
   --letter-spacing-wider: 0.05em;
   --letter-spacing-caps: 0.08em;
 
-  /* ========== SPACING ========== */
-  /* NOTE: Keeping constitution-required values */
-  --space-xs: 8px;
-  --space-sm: 16px;
-  --space-md: 32px;
-  --space-lg: 64px;
-  --space-xl: 96px;
-  --space-2xl: 128px;
+  /* ========== SPACING - MODERN STANDARD ========== */
+  /* Updated 2025-12-01: Industry-aligned spacing */
+  --space-xs: 8px;     /* Micro spacing, gaps */
+  --space-sm: 16px;    /* Internal spacing, small gaps */
+  --space-md: 24px;    /* Mobile horizontal padding */
+  --space-lg: 32px;    /* Tablet/mobile vertical, section spacing */
+  --space-xl: 48px;    /* Desktop vertical padding */
+  --space-2xl: 60px;   /* Desktop horizontal padding */
+  --space-3xl: 128px;  /* Margins between major sections */
 
-  /* Extended spacing for larger compositions */
-  --space-3xl: 64px;   /* Alias to lg for compatibility */
-  --space-4xl: 96px;   /* Alias to xl for compatibility */
-  --space-5xl: 128px;  /* Alias to 2xl for compatibility */
-
-  /* Legacy */
+  /* Legacy aliases (deprecated) */
+  --space-4xl: 96px;   /* DEPRECATED - do not use */
+  --space-5xl: 128px;  /* DEPRECATED - use --space-3xl */
   --grid-gap: 24px;
 
   /* ========== BORDERS & SHADOWS ========== */

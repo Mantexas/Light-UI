@@ -1,13 +1,15 @@
 /* ============================================
-   ⚠️  STYLE CONSTITUTION ENFORCEMENT
+   ⚠️  ADMIN PANEL - CONSTITUTION OVERRIDE
    ============================================
 
-   THIS PAGE MUST HAVE:
-   • .admin-container with padding: var(--space-lg) var(--space-xl)
-   • @media (max-width: 768px) with padding: var(--space-lg) var(--space-md)
-   • @media (max-width: 480px) with padding: var(--space-lg) var(--space-md)
+   Admin panels use DENSE UI spacing (not portfolio spacing).
+   Based on industry standards: Shopify Polaris, Material Design.
 
-   READ: ../../../STYLE_CONSTITUTION.md
+   Desktop:  padding: 20px 32px (header), 32px (container)
+   Tablet:   padding: 16px 24px (header), 24px (container)
+   Mobile:   padding: 12px 16px (header), 20px 16px (container)
+
+   READ: ../../../STYLE_CONSTITUTION.md § 1.5 (Admin Override)
    ============================================ */
 
 /* ============================================
@@ -167,7 +169,7 @@
 .admin-header {
   background: white;
   border-bottom: 1px solid var(--border);
-  padding: var(--space-xl) var(--space-3xl);
+  padding: 20px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -220,7 +222,7 @@
 .admin-container {
   max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: var(--space-2xl) var(--space-3xl);
+  padding: 32px;
 }
 
 /* ========== TABS - IMPROVED ========== */
@@ -237,7 +239,7 @@
 }
 
 .admin-tab-btn {
-  padding: var(--space-md) var(--space-xl);
+  padding: 10px 20px;
   background: transparent;
   border: none;
   border-radius: var(--radius-md);
@@ -1418,12 +1420,12 @@
   .admin-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--space-lg);
-    padding: var(--space-lg) var(--space-xl);
+    gap: 16px;
+    padding: 16px 24px;
   }
 
   .admin-container {
-    padding: var(--space-xl);
+    padding: 24px;
   }
 
   .admin-tabs {
@@ -1477,7 +1479,7 @@
 
 @media (max-width: 480px) {
   .admin-header {
-    padding: var(--space-md);
+    padding: 12px 16px;
   }
 
   .admin-header h1 {
@@ -1485,7 +1487,7 @@
   }
 
   .admin-container {
-    padding: var(--space-md);
+    padding: 20px 16px;
   }
 
   .admin-tabs {

@@ -3,9 +3,9 @@
    ============================================
 
    THIS PAGE MUST HAVE:
-   • .store-container with padding: var(--space-lg) var(--space-xl)
-   • @media (max-width: 768px) with padding: var(--space-lg) var(--space-md)
-   • @media (max-width: 480px) with padding: var(--space-lg) var(--space-md)
+   • .store-container with padding: 48px 60px (desktop)
+   • @media (max-width: 768px) with padding: 40px 32px (tablet) or 32px 24px (mobile)
+   • @media (max-width: 480px) with padding: 40px 32px (tablet) or 32px 24px (mobile)
 
    READ: ../../../STYLE_CONSTITUTION.md
    ============================================ */
@@ -20,7 +20,7 @@
 .store-container {
   max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: var(--space-lg) var(--space-xl);
+  padding: 48px 60px (desktop);
 }
 
 /* Store Intro */
@@ -160,7 +160,7 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .store-container {
-    padding: var(--space-lg) var(--space-md);
+    padding: 40px 32px (tablet) or 32px 24px (mobile);
   }
 
   .store-gallery {
@@ -179,7 +179,7 @@
 
 @media (max-width: 480px) {
   .store-container {
-    padding: var(--space-lg) var(--space-md);
+    padding: 40px 32px (tablet) or 32px 24px (mobile);
   }
 
   .store-intro h1 {
@@ -195,7 +195,7 @@
   }
 
   .order-form {
-    padding: var(--space-lg) var(--space-md);
+    padding: 40px 32px (tablet) or 32px 24px (mobile);
   }
 
   .form-group {

@@ -3,9 +3,9 @@
    ============================================
 
    THIS PAGE MUST HAVE:
-   • .stories-container with padding: var(--space-lg) var(--space-xl)
-   • @media (max-width: 768px) with padding: var(--space-lg) var(--space-md)
-   • @media (max-width: 480px) with padding: var(--space-lg) var(--space-md)
+   • .stories-container with padding: 48px 60px (desktop)
+   • @media (max-width: 768px) with padding: 40px 32px (tablet) or 32px 24px (mobile)
+   • @media (max-width: 480px) with padding: 40px 32px (tablet) or 32px 24px (mobile)
 
    READ: ../../../STYLE_CONSTITUTION.md
    ============================================ */
@@ -20,7 +20,7 @@
 .stories-container {
   max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: var(--space-lg) var(--space-xl);
+  padding: 48px 60px (desktop);
 }
 
 /* Stories Header */
@@ -317,7 +317,7 @@
 /* Responsive */
 @media (max-width: 768px) {
   .stories-container {
-    padding: var(--space-lg) var(--space-md);
+    padding: 40px 32px (tablet) or 32px 24px (mobile);
   }
 
   .stories-grid {
@@ -339,7 +339,7 @@
 
 @media (max-width: 480px) {
   .stories-container {
-    padding: var(--space-lg) var(--space-md);
+    padding: 40px 32px (tablet) or 32px 24px (mobile);
   }
 
   .stories-grid {
@@ -347,7 +347,7 @@
   }
 
   .modal-content {
-    padding: var(--space-lg) var(--space-md);
+    padding: 40px 32px (tablet) or 32px 24px (mobile);
   }
 
   .modal-close {
