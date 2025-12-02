@@ -1251,6 +1251,33 @@
   opacity: 1;
 }
 
+.gallery-image-name {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gallery-image-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  font-size: 10px;
+  opacity: 0.9;
+}
+
+.gallery-image-collection {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: var(--font-weight-medium);
+}
+
+.gallery-image-size {
+  opacity: 0.8;
+}
+
 /* ========== SETTINGS ========== */
 
 .settings-section {
