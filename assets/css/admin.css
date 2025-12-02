@@ -537,6 +537,8 @@
 .btn-small {
   padding: var(--space-sm) var(--space-md);
   font-size: var(--font-size-xs);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* ========== CHECKBOX ========== */
@@ -987,6 +989,8 @@
   margin-bottom: var(--space-lg);
   padding-bottom: var(--space-lg);
   border-bottom: 1px solid var(--border);
+  gap: var(--space-md);
+  flex-wrap: wrap;
 }
 
 .sidebar-header h3 {
@@ -996,6 +1000,8 @@
   letter-spacing: var(--letter-spacing-wider);
   margin: 0;
   color: var(--text-secondary);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .collections-list {
@@ -1097,10 +1103,12 @@
 .form-actions-small {
   display: flex;
   gap: var(--space-sm);
+  flex-wrap: wrap;
 }
 
 .form-actions-small button {
   flex: 1;
+  min-width: 80px;
 }
 
 .collection-header {
