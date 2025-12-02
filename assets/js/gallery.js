@@ -1,6 +1,6 @@
 /**
- * Gallery Collections Manager - Local File Detection
- * Drag & drop folders into images/gallery/ - that's it. Done.
+ * Gallery Collections Manager - Auto-Detection
+ * Drag & drop folders into images/ - auto-detected on both local and GitHub Pages.
  */
 
 class GalleryCollections {
@@ -43,7 +43,7 @@ class GalleryCollections {
    * Try GitHub API (for deployed version)
    */
   async detectFromGithub() {
-    const apiUrl = 'https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery';
+    const apiUrl = 'https://api.github.com/repos/Mantexas/Light-UI/contents/images';
     const response = await fetch(apiUrl);
 
     if (!response.ok) throw new Error('GitHub API failed');
@@ -165,7 +165,7 @@ class GalleryCollections {
    */
   async getCollectionImageCountGithub(collectionName) {
     try {
-      const apiUrl = `https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery/${collectionName}`;
+      const apiUrl = `https://api.github.com/repos/Mantexas/Light-UI/contents/images/${collectionName}`;
       const response = await fetch(apiUrl);
 
       if (!response.ok) return 0;
@@ -224,15 +224,9 @@ class GalleryCollections {
    */
   async loadCollectionImages(collectionName) {
     try {
-      // Try GitHub API first (check both images/ and images/gallery/)
-      let apiUrl = `https://api.github.com/repos/Mantexas/Light-UI/contents/images/${collectionName}`;
-      let response = await fetch(apiUrl);
-
-      if (!response.ok) {
-        // Try gallery subfolder as fallback
-        apiUrl = `https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery/${collectionName}`;
-        response = await fetch(apiUrl);
-      }
+      // Try GitHub API first (for production deployment)
+      const apiUrl = `https://api.github.com/repos/Mantexas/Light-UI/contents/images/${collectionName}`;
+      const response = await fetch(apiUrl);
 
       if (response.ok) {
         const files = await response.json();
@@ -240,11 +234,10 @@ class GalleryCollections {
           ? files.filter(f => this.isImageFile(f.name))
           : [];
 
-        const basePath = apiUrl.includes('/gallery/') ? 'images/gallery' : 'images';
         this.images = imageFiles.map(file => ({
           name: file.name,
-          url: `${basePath}/${collectionName}/${file.name}`,
-          thumb: `${basePath}/${collectionName}/${file.name}`
+          url: `images/${collectionName}/${file.name}`,
+          thumb: `images/${collectionName}/${file.name}`
         }));
 
         this.renderGalleryGrid();

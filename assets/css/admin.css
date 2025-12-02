@@ -478,6 +478,8 @@
   margin-top: var(--space-xl);
   padding-top: var(--space-xl);
   border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .btn-primary,
@@ -492,6 +494,8 @@
   cursor: pointer;
   transition: all var(--transition-fast);
   font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn-primary {
@@ -1117,6 +1121,8 @@
 .collection-header-actions {
   display: flex;
   gap: var(--space-sm);
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .gallery-controls {
@@ -1129,6 +1135,7 @@
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
+  flex-wrap: wrap;
 }
 
 .gallery-controls-left,

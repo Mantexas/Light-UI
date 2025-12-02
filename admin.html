@@ -73,6 +73,7 @@
             <!-- Navigation Tabs -->
             <div class="admin-tabs">
                 <button class="admin-tab-btn active" data-tab="dashboard">Dashboard</button>
+                <button class="admin-tab-btn" data-tab="homepage">Homepage</button>
                 <button class="admin-tab-btn" data-tab="about">About</button>
                 <button class="admin-tab-btn" data-tab="articles">Articles</button>
                 <button class="admin-tab-btn" data-tab="videos">Videos</button>
@@ -110,6 +111,75 @@
                         <li><strong>Thumbnails folder:</strong> <code>images/thumbnails/</code></li>
                         <li><strong>Repository:</strong> Mantexas/Light-UI</li>
                     </ul>
+                </div>
+            </div>
+
+            <!-- Homepage Tab -->
+            <div id="homepageTab" class="admin-tab-content">
+                <h2>Homepage Management</h2>
+
+                <div class="article-editor-section">
+                    <h3>Edit Homepage Content</h3>
+
+                    <form id="homepageForm" class="article-form">
+                        <div class="form-group">
+                            <label for="heroTitle">Hero Title *</label>
+                            <textarea
+                                id="heroTitle"
+                                name="heroTitle"
+                                rows="3"
+                                required
+                                placeholder="Immerse yourself in a curated selection of fine art pieces that capture nature's beauty."
+                                maxlength="300"></textarea>
+                            <p class="form-hint">Main headline text - keep it concise and impactful (max 300 characters)</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="heroDescription">Hero Description *</label>
+                            <textarea
+                                id="heroDescription"
+                                name="heroDescription"
+                                rows="5"
+                                required
+                                placeholder="Meticulously crafted and printed directly on exceptional materials..."
+                                maxlength="500"></textarea>
+                            <p class="form-hint">Supporting description text (max 500 characters)</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ctaButtonText">Call to Action Button Text *</label>
+                            <input
+                                type="text"
+                                id="ctaButtonText"
+                                name="ctaButtonText"
+                                required
+                                placeholder="VISIT GALLERY"
+                                maxlength="30">
+                            <p class="form-hint">Button text - keep it short and action-oriented (max 30 characters)</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ctaButtonLink">Call to Action Link *</label>
+                            <input
+                                type="text"
+                                id="ctaButtonLink"
+                                name="ctaButtonLink"
+                                required
+                                placeholder="color.html"
+                                pattern=".*\.(html|htm)$">
+                            <p class="form-hint">Relative link to another page (e.g., color.html, store.html)</p>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" id="homepageSubmitBtn" class="btn-primary">Save Homepage Content</button>
+                            <button type="reset" id="homepageResetBtn" class="btn-secondary">Reset to Defaults</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="articles-list">
+                    <h3>Preview</h3>
+                    <p style="color: var(--text-secondary); font-weight: var(--font-weight-light);">Visit the <a href="index.html" target="_blank" style="color: var(--accent);">Homepage</a> to see your changes live.</p>
                 </div>
             </div>
 

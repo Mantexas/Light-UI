@@ -26,6 +26,7 @@ class AdminPanel {
     if (this.isAuthenticated) {
       this.showDashboard();
       this.loadStats();
+      this.setupHomepageEditor();
       this.setupAboutEditor();
       this.setupArticleEditor();
       this.setupGalleryManagement();
@@ -49,7 +50,11 @@ class AdminPanel {
       this.isAuthenticated = true;
       this.showDashboard();
       this.loadStats();
+      this.setupHomepageEditor();
+      this.setupAboutEditor();
       this.setupArticleEditor();
+      this.setupGalleryManagement();
+      this.setupUploadHandlers();
     } else {
       this.loginError.textContent = 'Invalid username or password';
       this.loginError.style.display = 'block';
@@ -122,9 +127,9 @@ class AdminPanel {
       let galleryCount = 0;
       let videosCount = 0;
 
-      // Try to load gallery from new structure (images/gallery/)
+      // Try to load gallery collections from images/
       try {
-        const galleryResponse = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery');
+        const galleryResponse = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images');
         if (galleryResponse.ok) {
           const folders = await galleryResponse.json();
           // Count images in all collections
@@ -171,6 +176,67 @@ class AdminPanel {
     } catch (error) {
       console.error('Error loading stats:', error);
     }
+  }
+
+  // ==================== HOMEPAGE EDITOR ====================
+
+  setupHomepageEditor() {
+    const form = document.getElementById('homepageForm');
+    if (form) {
+      form.addEventListener('submit', (e) => this.handleHomepageSubmit(e));
+      form.addEventListener('reset', (e) => this.handleHomepageReset(e));
+      this.loadHomepageContent();
+    }
+  }
+
+  loadHomepageContent() {
+    const defaults = {
+      heroTitle: 'Immerse yourself in a curated selection of fine art pieces that capture nature\'s beauty.',
+      heroDescription: 'Meticulously crafted and printed directly on exceptional materials such as aluminum, glass, or the finest Hahnemühle paper, each piece tells its own story, offering a moment of reflection, wonder, and connection, designed to last 100 years.',
+      ctaButtonText: 'VISIT GALLERY',
+      ctaButtonLink: 'color.html'
+    };
+
+    const stored = localStorage.getItem('homepageContent');
+    const content = stored ? JSON.parse(stored) : defaults;
+
+    document.getElementById('heroTitle').value = content.heroTitle;
+    document.getElementById('heroDescription').value = content.heroDescription;
+    document.getElementById('ctaButtonText').value = content.ctaButtonText;
+    document.getElementById('ctaButtonLink').value = content.ctaButtonLink;
+  }
+
+  handleHomepageSubmit(e) {
+    e.preventDefault();
+
+    const content = {
+      heroTitle: document.getElementById('heroTitle').value.trim(),
+      heroDescription: document.getElementById('heroDescription').value.trim(),
+      ctaButtonText: document.getElementById('ctaButtonText').value.trim(),
+      ctaButtonLink: document.getElementById('ctaButtonLink').value.trim(),
+      lastUpdated: new Date().toISOString()
+    };
+
+    // Validation
+    if (!content.heroTitle || !content.heroDescription || !content.ctaButtonText || !content.ctaButtonLink) {
+      this.showNotification('All fields are required!', 'error');
+      return;
+    }
+
+    if (!content.ctaButtonLink.match(/\.(html|htm)$/)) {
+      this.showNotification('CTA link must be an HTML file (e.g., color.html)', 'error');
+      return;
+    }
+
+    localStorage.setItem('homepageContent', JSON.stringify(content));
+    this.showNotification('Homepage content saved successfully! Refresh the homepage to see changes.');
+  }
+
+  handleHomepageReset(e) {
+    e.preventDefault();
+    localStorage.removeItem('homepageContent');
+    this.loadHomepageContent();
+    this.showNotification('Homepage content reset to defaults.');
   }
 
   // ==================== ABOUT EDITOR ====================
@@ -411,7 +477,7 @@ class AdminPanel {
     grid.innerHTML = '<p class="loading">Loading images...</p>';
 
     try {
-      const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery');
+      const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images');
       const folders = await response.json();
 
       if (!Array.isArray(folders)) {
@@ -422,7 +488,7 @@ class AdminPanel {
       let allImages = [];
 
       for (const folder of folders) {
-        if (folder.type === 'dir') {
+        if (folder.type === 'dir' && folder.name !== 'homepage') {
           try {
             const collResponse = await fetch(folder.url);
             const files = await collResponse.json();
@@ -431,7 +497,7 @@ class AdminPanel {
               allImages = allImages.concat(images.map(img => ({
                 name: img.name,
                 collection: folder.name,
-                url: `images/gallery/${folder.name}/${img.name}`
+                url: `images/${folder.name}/${img.name}`
               })));
             }
           } catch (e) {
@@ -1296,7 +1362,7 @@ class AdminPanel {
     galleryList.innerHTML = '<p class="loading">Loading gallery...</p>';
 
     try {
-      const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery');
+      const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images');
       const folders = await response.json();
 
       if (!Array.isArray(folders)) {
@@ -1304,10 +1370,10 @@ class AdminPanel {
         return;
       }
 
-      const collections = folders.filter(f => f.type === 'dir');
+      const collections = folders.filter(f => f.type === 'dir' && f.name !== 'homepage');
 
       if (collections.length === 0) {
-        galleryList.innerHTML = '<p class="loading">No collections. Create folders in images/gallery/</p>';
+        galleryList.innerHTML = '<p class="loading">No collections. Create folders in images/</p>';
         return;
       }
 
@@ -1339,14 +1405,14 @@ class AdminPanel {
       galleryList.innerHTML = allImages.map(file => `
         <div class="file-item">
           <div class="file-thumbnail">
-            <img src="images/gallery/${file.collection}/${file.name}" alt="${file.name}" style="width: 100%; height: 100%; object-fit: cover;">
+            <img src="images/${file.collection}/${file.name}" alt="${file.name}" style="width: 100%; height: 100%; object-fit: cover;">
           </div>
           <div class="file-info">
             <div class="file-name">${file.name}</div>
             <div class="file-size">${this.formatFileSize(file.size)}</div>
             <div class="file-collection">${file.collection}</div>
             <div class="file-actions">
-              <a href="images/gallery/${file.collection}/${file.name}" target="_blank" class="file-action-btn">View</a>
+              <a href="images/${file.collection}/${file.name}" target="_blank" class="file-action-btn">View</a>
             </div>
           </div>
         </div>
@@ -1397,7 +1463,7 @@ class AdminPanel {
     if (files.length === 0) return;
 
     this.showNotification(
-      `${files.length} file${files.length !== 1 ? 's' : ''} selected. Push to GitHub:\n\nVideos: images/videos/large/\nGallery: images/gallery/[collection-name]/`,
+      `${files.length} file${files.length !== 1 ? 's' : ''} selected. Push to GitHub:\n\nGallery: images/[collection-name]/\nHomepage: images/homepage/`,
       'info'
     );
   }

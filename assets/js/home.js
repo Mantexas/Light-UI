@@ -2,6 +2,42 @@
 // HOME PAGE JAVASCRIPT
 // ==========================================
 
+// Load homepage content from localStorage
+function loadHomepageContent() {
+    const stored = localStorage.getItem('homepageContent');
+
+    if (!stored) return; // Use defaults from HTML
+
+    try {
+        const content = JSON.parse(stored);
+
+        // Update hero title
+        const heroTitle = document.querySelector('.hero-title');
+        if (heroTitle && content.heroTitle) {
+            heroTitle.textContent = content.heroTitle;
+        }
+
+        // Update hero description
+        const heroDescription = document.querySelector('.hero-description');
+        if (heroDescription && content.heroDescription) {
+            heroDescription.textContent = content.heroDescription;
+        }
+
+        // Update CTA button
+        const ctaButton = document.querySelector('.cta-button');
+        if (ctaButton) {
+            if (content.ctaButtonText) {
+                ctaButton.textContent = content.ctaButtonText;
+            }
+            if (content.ctaButtonLink) {
+                ctaButton.href = content.ctaButtonLink;
+            }
+        }
+    } catch (error) {
+        console.error('Error loading homepage content:', error);
+    }
+}
+
 // Load hero gallery images from GitHub API
 async function loadHeroGallery() {
     const heroGallery = document.getElementById('heroGallery');
@@ -63,6 +99,7 @@ function initAnimations() {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
+    loadHomepageContent();
     loadHeroGallery();
     initAnimations();
 });
