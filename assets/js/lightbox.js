@@ -381,16 +381,12 @@ function initKodachromeToggle() {
 }
 
 // Initialize on page load
-let lightbox;
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    lightbox = new AdvancedLightbox();
+    window.AdvancedLightbox = new AdvancedLightbox();
     initKodachromeToggle();
   });
 } else {
-  lightbox = new AdvancedLightbox();
+  window.AdvancedLightbox = new AdvancedLightbox();
   initKodachromeToggle();
 }
-
-// Export for use by gallery.js
-window.AdvancedLightbox = lightbox;

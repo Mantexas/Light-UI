@@ -347,15 +347,23 @@ class GalleryCollections {
    * Open lightbox with advanced features
    */
   openLightbox(index) {
-    if (!this.images[index]) return;
+    if (!this.images[index]) {
+      console.error('Image not found at index:', index);
+      return;
+    }
 
     // Get all image URLs
     const allImageUrls = this.images.map(img => img.url);
     const clickedImageUrl = this.images[index].url;
 
+    console.log('Opening lightbox:', clickedImageUrl, 'Total images:', allImageUrls.length);
+
     // Use the advanced lightbox
     if (window.AdvancedLightbox) {
       window.AdvancedLightbox.open(clickedImageUrl, allImageUrls);
+    } else {
+      console.error('AdvancedLightbox not initialized! Check script loading order.');
+      alert('Lightbox not available. Check console for errors.');
     }
   }
 
