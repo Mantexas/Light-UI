@@ -26,6 +26,7 @@ class AdminPanel {
     if (this.isAuthenticated) {
       this.showDashboard();
       this.loadStats();
+      this.setupHomepageEditor();
       this.setupAboutEditor();
       this.setupArticleEditor();
       this.setupGalleryManagement();
@@ -49,7 +50,11 @@ class AdminPanel {
       this.isAuthenticated = true;
       this.showDashboard();
       this.loadStats();
+      this.setupHomepageEditor();
+      this.setupAboutEditor();
       this.setupArticleEditor();
+      this.setupGalleryManagement();
+      this.setupUploadHandlers();
     } else {
       this.loginError.textContent = 'Invalid username or password';
       this.loginError.style.display = 'block';
@@ -171,6 +176,67 @@ class AdminPanel {
     } catch (error) {
       console.error('Error loading stats:', error);
     }
+  }
+
+  // ==================== HOMEPAGE EDITOR ====================
+
+  setupHomepageEditor() {
+    const form = document.getElementById('homepageForm');
+    if (form) {
+      form.addEventListener('submit', (e) => this.handleHomepageSubmit(e));
+      form.addEventListener('reset', (e) => this.handleHomepageReset(e));
+      this.loadHomepageContent();
+    }
+  }
+
+  loadHomepageContent() {
+    const defaults = {
+      heroTitle: 'Immerse yourself in a curated selection of fine art pieces that capture nature\'s beauty.',
+      heroDescription: 'Meticulously crafted and printed directly on exceptional materials such as aluminum, glass, or the finest Hahnemühle paper, each piece tells its own story, offering a moment of reflection, wonder, and connection, designed to last 100 years.',
+      ctaButtonText: 'VISIT GALLERY',
+      ctaButtonLink: 'color.html'
+    };
+
+    const stored = localStorage.getItem('homepageContent');
+    const content = stored ? JSON.parse(stored) : defaults;
+
+    document.getElementById('heroTitle').value = content.heroTitle;
+    document.getElementById('heroDescription').value = content.heroDescription;
+    document.getElementById('ctaButtonText').value = content.ctaButtonText;
+    document.getElementById('ctaButtonLink').value = content.ctaButtonLink;
+  }
+
+  handleHomepageSubmit(e) {
+    e.preventDefault();
+
+    const content = {
+      heroTitle: document.getElementById('heroTitle').value.trim(),
+      heroDescription: document.getElementById('heroDescription').value.trim(),
+      ctaButtonText: document.getElementById('ctaButtonText').value.trim(),
+      ctaButtonLink: document.getElementById('ctaButtonLink').value.trim(),
+      lastUpdated: new Date().toISOString()
+    };
+
+    // Validation
+    if (!content.heroTitle || !content.heroDescription || !content.ctaButtonText || !content.ctaButtonLink) {
+      this.showNotification('All fields are required!', 'error');
+      return;
+    }
+
+    if (!content.ctaButtonLink.match(/\.(html|htm)$/)) {
+      this.showNotification('CTA link must be an HTML file (e.g., color.html)', 'error');
+      return;
+    }
+
+    localStorage.setItem('homepageContent', JSON.stringify(content));
+    this.showNotification('Homepage content saved successfully! Refresh the homepage to see changes.');
+  }
+
+  handleHomepageReset(e) {
+    e.preventDefault();
+    localStorage.removeItem('homepageContent');
+    this.loadHomepageContent();
+    this.showNotification('Homepage content reset to defaults.');
   }
 
   // ==================== ABOUT EDITOR ====================
