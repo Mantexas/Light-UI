@@ -122,9 +122,9 @@ class AdminPanel {
       let galleryCount = 0;
       let videosCount = 0;
 
-      // Try to load gallery from new structure (images/gallery/)
+      // Try to load gallery collections from images/
       try {
-        const galleryResponse = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery');
+        const galleryResponse = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images');
         if (galleryResponse.ok) {
           const folders = await galleryResponse.json();
           // Count images in all collections
@@ -411,7 +411,7 @@ class AdminPanel {
     grid.innerHTML = '<p class="loading">Loading images...</p>';
 
     try {
-      const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery');
+      const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images');
       const folders = await response.json();
 
       if (!Array.isArray(folders)) {
@@ -422,7 +422,7 @@ class AdminPanel {
       let allImages = [];
 
       for (const folder of folders) {
-        if (folder.type === 'dir') {
+        if (folder.type === 'dir' && folder.name !== 'homepage') {
           try {
             const collResponse = await fetch(folder.url);
             const files = await collResponse.json();
@@ -431,7 +431,7 @@ class AdminPanel {
               allImages = allImages.concat(images.map(img => ({
                 name: img.name,
                 collection: folder.name,
-                url: `images/gallery/${folder.name}/${img.name}`
+                url: `images/${folder.name}/${img.name}`
               })));
             }
           } catch (e) {
@@ -1296,7 +1296,7 @@ class AdminPanel {
     galleryList.innerHTML = '<p class="loading">Loading gallery...</p>';
 
     try {
-      const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery');
+      const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images');
       const folders = await response.json();
 
       if (!Array.isArray(folders)) {
@@ -1304,10 +1304,10 @@ class AdminPanel {
         return;
       }
 
-      const collections = folders.filter(f => f.type === 'dir');
+      const collections = folders.filter(f => f.type === 'dir' && f.name !== 'homepage');
 
       if (collections.length === 0) {
-        galleryList.innerHTML = '<p class="loading">No collections. Create folders in images/gallery/</p>';
+        galleryList.innerHTML = '<p class="loading">No collections. Create folders in images/</p>';
         return;
       }
 
@@ -1339,14 +1339,14 @@ class AdminPanel {
       galleryList.innerHTML = allImages.map(file => `
         <div class="file-item">
           <div class="file-thumbnail">
-            <img src="images/gallery/${file.collection}/${file.name}" alt="${file.name}" style="width: 100%; height: 100%; object-fit: cover;">
+            <img src="images/${file.collection}/${file.name}" alt="${file.name}" style="width: 100%; height: 100%; object-fit: cover;">
           </div>
           <div class="file-info">
             <div class="file-name">${file.name}</div>
             <div class="file-size">${this.formatFileSize(file.size)}</div>
             <div class="file-collection">${file.collection}</div>
             <div class="file-actions">
-              <a href="images/gallery/${file.collection}/${file.name}" target="_blank" class="file-action-btn">View</a>
+              <a href="images/${file.collection}/${file.name}" target="_blank" class="file-action-btn">View</a>
             </div>
           </div>
         </div>
@@ -1397,7 +1397,7 @@ class AdminPanel {
     if (files.length === 0) return;
 
     this.showNotification(
-      `${files.length} file${files.length !== 1 ? 's' : ''} selected. Push to GitHub:\n\nVideos: images/videos/large/\nGallery: images/gallery/[collection-name]/`,
+      `${files.length} file${files.length !== 1 ? 's' : ''} selected. Push to GitHub:\n\nGallery: images/[collection-name]/\nHomepage: images/homepage/`,
       'info'
     );
   }
