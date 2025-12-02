@@ -344,38 +344,19 @@ class GalleryCollections {
   }
 
   /**
-   * Open lightbox
+   * Open lightbox with advanced features
    */
   openLightbox(index) {
     if (!this.images[index]) return;
 
-    const image = this.images[index];
-    const modal = document.createElement('div');
-    modal.className = 'lightbox-modal';
-    modal.innerHTML = `
-      <div class="lightbox-content">
-        <button class="lightbox-close">&times;</button>
-        <img src="${image.url}" alt="${this.escapeHtml(image.name)}" />
-        <div class="lightbox-info">
-          <p>${this.escapeHtml(image.name)}</p>
-          <small>${index + 1} / ${this.images.length}</small>
-        </div>
-      </div>
-    `;
+    // Get all image URLs
+    const allImageUrls = this.images.map(img => img.url);
+    const clickedImageUrl = this.images[index].url;
 
-    document.body.appendChild(modal);
-
-    modal.querySelector('.lightbox-close').addEventListener('click', () => {
-      modal.remove();
-    });
-
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) modal.remove();
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') modal.remove();
-    });
+    // Use the advanced lightbox
+    if (window.AdvancedLightbox) {
+      window.AdvancedLightbox.open(clickedImageUrl, allImageUrls);
+    }
   }
 
   /**
