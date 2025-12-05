@@ -59,17 +59,13 @@ class GalleryCollections {
     }
 
     this.collections = await Promise.all(
-      folders.map(async (folder) => {
-        const imageCount = await this.getCollectionImageCountGithub(folder.name);
-        const firstImage = await this.getFirstImageFromCollection(folder.name);
-        return {
-          name: folder.name,
-          path: folder.path,
-          url: folder.url,
-          imageCount: imageCount,
-          thumbnail: firstImage
-        };
-      })
+      folders.map(async (folder) => ({
+        name: folder.name,
+        path: folder.path,
+        url: folder.url,
+        imageCount: await this.getCollectionImageCountGithub(folder.name),
+        thumbnail: await this.getFirstImageFromCollection(folder.name)
+      }))
     );
 
     if (this.collections.length > 0) {
@@ -185,7 +181,7 @@ class GalleryCollections {
   }
 
   /**
-   * Get first image from a collection for thumbnail
+   * Get first image from collection for thumbnail
    */
   async getFirstImageFromCollection(collectionName) {
     try {
@@ -200,7 +196,6 @@ class GalleryCollections {
       const images = files.filter(f => this.isImageFile(f.name));
       if (images.length === 0) return null;
 
-      // Return path to first image
       return `images/${collectionName}/${images[0].name}`;
     } catch (error) {
       return null;
@@ -217,7 +212,7 @@ class GalleryCollections {
           <div class="collection-thumbnail">
             ${collection.thumbnail
               ? `<img src="${collection.thumbnail}" alt="${this.escapeHtml(collection.name)}" loading="lazy">`
-              : '<div class="placeholder-thumbnail"></div>'}
+              : '<div style="width:100%;height:100%;background:#e0e0e0;"></div>'}
           </div>
           <div class="collection-info">
             <h3 class="collection-name">${this.escapeHtml(collection.name)}</h3>
@@ -352,92 +347,31 @@ class GalleryCollections {
   }
 
   /**
-   * Render featured image + thumbnail carousel
+   * Render film strip carousel
    */
   renderGalleryGrid() {
     if (this.images.length === 0) return;
 
-    this.currentImageIndex = 0;
+    const filmStrip = document.getElementById('filmStrip');
+    if (!filmStrip) return;
 
-    // Set up featured image
-    const featuredImage = document.getElementById('featuredImage');
-    const thumbnailCarousel = document.getElementById('thumbnailCarousel');
-
-    if (!featuredImage || !thumbnailCarousel) return;
-
-    // Show first image as featured
-    featuredImage.src = this.images[0].url;
-    featuredImage.alt = this.images[0].name;
-
-    // Click featured image to open lightbox
-    featuredImage.onclick = () => this.openLightbox(this.currentImageIndex);
-
-    // Render thumbnails
-    thumbnailCarousel.innerHTML = this.images
+    // Render all images as film frames
+    filmStrip.innerHTML = this.images
       .map((image, index) => `
-        <div class="thumbnail-item ${index === 0 ? 'active' : ''}" data-index="${index}">
-          <img src="${image.thumb}" alt="${this.escapeHtml(image.name)}" loading="lazy">
+        <div class="film-frame" data-index="${index}">
+          <img src="${image.url}" alt="${this.escapeHtml(image.name)}" loading="lazy">
         </div>
       `).join('');
 
-    // Add thumbnail click handlers
-    document.querySelectorAll('.thumbnail-item').forEach(thumb => {
-      thumb.addEventListener('click', () => {
-        const index = parseInt(thumb.dataset.index);
-        this.showFeaturedImage(index);
+    // Add click handlers to open lightbox
+    document.querySelectorAll('.film-frame').forEach(frame => {
+      frame.addEventListener('click', () => {
+        const index = parseInt(frame.dataset.index);
+        this.openLightbox(index);
       });
     });
 
-    // Carousel navigation
-    const carouselPrev = document.getElementById('carouselPrev');
-    const carouselNext = document.getElementById('carouselNext');
-
-    if (carouselPrev) {
-      carouselPrev.onclick = () => this.scrollCarousel(-1);
-    }
-
-    if (carouselNext) {
-      carouselNext.onclick = () => this.scrollCarousel(1);
-    }
-
     this.imageCounter.textContent = `${this.images.length} image${this.images.length !== 1 ? 's' : ''}`;
-  }
-
-  /**
-   * Show featured image at index
-   */
-  showFeaturedImage(index) {
-    if (!this.images[index]) return;
-
-    this.currentImageIndex = index;
-
-    const featuredImage = document.getElementById('featuredImage');
-    if (featuredImage) {
-      featuredImage.src = this.images[index].url;
-      featuredImage.alt = this.images[index].name;
-    }
-
-    // Update active thumbnail
-    document.querySelectorAll('.thumbnail-item').forEach((thumb, i) => {
-      thumb.classList.toggle('active', i === index);
-    });
-
-    // Scroll thumbnail into view
-    const activeThumb = document.querySelector('.thumbnail-item.active');
-    if (activeThumb) {
-      activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    }
-  }
-
-  /**
-   * Scroll carousel
-   */
-  scrollCarousel(direction) {
-    const carousel = document.getElementById('thumbnailCarousel');
-    if (!carousel) return;
-
-    const scrollAmount = 150 * direction;
-    carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
   }
 
   /**
