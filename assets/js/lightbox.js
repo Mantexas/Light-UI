@@ -352,29 +352,11 @@ class AdvancedLightbox {
   }
 }
 
-// Kodachrome effect toggle
-function initKodachromeToggle() {
-  const toggle = document.createElement('button');
-  toggle.id = 'kodachromeToggle';
-  toggle.title = 'Toggle Film Effect';
-  toggle.innerHTML = `
-    <svg viewBox="0 0 24 24">
-      <path d="M20 6h-2.8l-1.4-2H8.2L6.8 6H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM12 17c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5z"/>
-    </svg>
-  `;
-  toggle.addEventListener('click', () => {
-    document.body.classList.toggle('kodachrome');
-  });
-  document.body.appendChild(toggle);
-}
-
 // Initialize on page load
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     window.AdvancedLightbox = new AdvancedLightbox();
-    initKodachromeToggle();
   });
 } else {
   window.AdvancedLightbox = new AdvancedLightbox();
-  initKodachromeToggle();
 }
