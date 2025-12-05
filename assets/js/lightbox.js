@@ -57,7 +57,7 @@ class AdvancedLightbox {
       <div class="lightbox-nav-bar">
         <svg id="lb-prevBtn" viewBox="0 0 24 24"><path d="M15.41 7.4L14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></svg>
         <svg id="lb-downloadBtn" viewBox="0 0 24 24" title="Download"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-        <svg id="lb-fullscreenBtn" viewBox="0 0 24 24" title="Fullscreen"><path d="M5 5h5V3H3v7h2zm5 14H5v-5H3v7h7zm11-5h-2v5h-5v2h7zm-2-9V3h-5v2h5z"/></svg>
+        <button id="lb-fullscreenBtn" class="lb-text-btn" title="Fullscreen">Full Screen</button>
         <svg id="lb-nextBtn" viewBox="0 0 24 24"><path d="M8.6 16.6L13.2 12 8.6 7.4 10 6l6 6-6 6z"/></svg>
         <svg id="lb-closeBtn" viewBox="0 0 24 24"><path d="M19 6.4L17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg>
       </div>
