@@ -56,7 +56,7 @@ As you continue your photographic journey, remember that every image tells a sto
 
 The best photographs aren't always technically perfect—they're the ones that move people, that make them pause and reflect. Keep shooting, keep learning, and most importantly, keep seeing the world through your own lens.`,
         date: "2024-12-01",
-        author: "Gediminaš Zdancius",
+        author: "",
         category: "Photography"
       }];
     }
