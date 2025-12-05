@@ -139,10 +139,10 @@
   height: 100%;
   background: rgba(0, 0, 0, 0.95);
   display: none;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: var(--z-lightbox);
-  padding: var(--space-lg);
+  padding: var(--space-xl) var(--space-lg);
   overflow-y: auto;
 }
 
