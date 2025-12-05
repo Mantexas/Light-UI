@@ -26,14 +26,39 @@ class StoriesPage {
     const stored = localStorage.getItem('articles');
     this.articles = stored ? JSON.parse(stored) : [];
 
+    // Add sample article if no articles exist
     if (this.articles.length === 0) {
-      this.storiesGrid.style.display = 'none';
-      this.emptyState.style.display = 'flex';
-      this.emptyState.innerHTML = `
-        <p>Coming Soon</p>
-        <p style="font-size: var(--font-size-sm); color: var(--text-secondary); font-weight: var(--font-weight-light); max-width: 500px; line-height: var(--line-height-relaxed);">We're crafting thoughtful stories about photography, creative process, and art. Check back soon for our first article.</p>
-      `;
-      return;
+      this.articles = [{
+        title: "The Art of Seeing: A Photographer's Journey",
+        excerpt: "Photography is more than capturing moments—it's about seeing the world through a unique lens and sharing that perspective with others.",
+        body: `Photography has always been more than just pointing a camera and pressing a button. It's an art form that requires patience, vision, and a deep connection with the world around us.
+
+## Finding Your Vision
+
+Every photographer develops their own unique way of seeing. Some are drawn to the stark contrast of black and white, while others chase the golden hour's warm embrace. What matters most is finding what speaks to you.
+
+**The key elements of photographic vision:**
+
+* Understanding light and shadow
+* Recognizing patterns and composition
+* Feeling the emotional weight of a scene
+* Timing—knowing when to capture the moment
+
+## The Technical Journey
+
+While vision is paramount, understanding your tools is equally important. Modern cameras offer incredible capabilities, but they're only as good as the person behind them.
+
+> "The camera is an instrument that teaches people how to see without a camera." - Dorothea Lange
+
+## Moving Forward
+
+As you continue your photographic journey, remember that every image tells a story. Whether you're shooting landscapes, portraits, or street photography, your unique perspective is what makes your work valuable.
+
+The best photographs aren't always technically perfect—they're the ones that move people, that make them pause and reflect. Keep shooting, keep learning, and most importantly, keep seeing the world through your own lens.`,
+        date: "2024-12-01",
+        author: "Gediminaš Zdancius",
+        category: "Photography"
+      }];
     }
 
     this.storiesGrid.style.display = 'grid';
