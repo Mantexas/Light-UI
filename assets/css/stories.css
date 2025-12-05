@@ -20,7 +20,7 @@
 .stories-container {
   max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: 48px 60px;
+  padding: var(--space-xl) var(--space-2xl);
 }
 
 /* Stories Header */
@@ -317,7 +317,7 @@
 /* Responsive */
 @media (max-width: 768px) {
   .stories-container {
-    padding: 40px 32px;
+    padding: var(--space-lg) var(--space-md);
   }
 
   .stories-grid {
@@ -339,7 +339,7 @@
 
 @media (max-width: 480px) {
   .stories-container {
-    padding: 32px 24px;
+    padding: var(--space-lg) var(--space-sm);
   }
 
   .stories-grid {
@@ -347,7 +347,7 @@
   }
 
   .modal-content {
-    padding: 32px 24px;
+    padding: var(--space-lg) var(--space-sm);
   }
 
   .modal-close {
