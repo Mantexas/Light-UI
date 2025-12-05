@@ -50,7 +50,7 @@ class GalleryCollections {
 
     const files = await response.json();
     const folders = Array.isArray(files)
-      ? files.filter(f => f.type === 'dir' && !f.name.startsWith('.'))
+      ? files.filter(f => f.type === 'dir' && !f.name.startsWith('.') && f.name.toLowerCase() !== 'homepage')
       : [];
 
     if (folders.length === 0) {
