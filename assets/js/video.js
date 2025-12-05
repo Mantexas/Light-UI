@@ -33,9 +33,9 @@ class VideoGallery {
       const response = await fetch(apiUrl);
 
       if (!response.ok) {
-        // If videos folder doesn't exist, show message
+        // If videos folder doesn't exist, add sample YouTube video
         if (response.status === 404) {
-          this.showEmptyState();
+          this.addSampleYouTubeVideo();
           return;
         }
         throw new Error(`API error: ${response.status}`);
@@ -50,7 +50,7 @@ class VideoGallery {
       });
 
       if (videoFiles.length === 0) {
-        this.showEmptyState();
+        this.addSampleYouTubeVideo();
         return;
       }
 
@@ -62,15 +62,33 @@ class VideoGallery {
         url: `images/videos/large/${file.name}`,
         ext: file.name.split('.').pop().toLowerCase(),
         thumbnail: this.getThumbnailUrl(file.name),
-        description: `A visual essay exploring light and composition`
+        description: `A visual essay exploring light and composition`,
+        type: 'local'
       }));
 
       this.renderVideos();
       this.updateVideoCount();
     } catch (error) {
       console.error('Error loading videos:', error);
-      this.showEmptyState();
+      this.addSampleYouTubeVideo();
     }
+  }
+
+  /**
+   * Add sample YouTube video
+   */
+  addSampleYouTubeVideo() {
+    this.videos = [{
+      id: 'GFQbXdiB7vk',
+      name: 'Featured Film',
+      url: 'https://www.youtube.com/embed/GFQbXdiB7vk',
+      thumbnail: 'https://img.youtube.com/vi/GFQbXdiB7vk/maxresdefault.jpg',
+      description: 'Visual storytelling and cinematic exploration',
+      type: 'youtube'
+    }];
+
+    this.renderVideos();
+    this.updateVideoCount();
   }
 
   /**
@@ -139,23 +157,61 @@ class VideoGallery {
     this.videoTitle.textContent = video.name;
     this.videoDescription.textContent = video.description;
 
-    // Clear previous sources
-    this.videoPlayer.innerHTML = '';
+    const modalContent = this.videoModal.querySelector('.video-modal-content');
 
-    // Add video source with fallback
-    const source = document.createElement('source');
-    source.src = video.url;
-    source.type = this.getMimeType(video.ext);
-    this.videoPlayer.appendChild(source);
+    if (video.type === 'youtube') {
+      // Hide HTML5 video player and show YouTube iframe
+      this.videoPlayer.style.display = 'none';
 
-    // Add fallback text
-    const fallback = document.createElement('p');
-    fallback.textContent = 'Your browser doesn\'t support this video format. Please try a different browser or download the video.';
-    this.videoPlayer.appendChild(fallback);
+      // Remove existing iframe if any
+      const existingIframe = modalContent.querySelector('.youtube-iframe');
+      if (existingIframe) {
+        existingIframe.remove();
+      }
 
-    // Show modal and play
+      // Create YouTube iframe
+      const iframe = document.createElement('iframe');
+      iframe.className = 'youtube-iframe';
+      iframe.src = video.url + '?autoplay=1';
+      iframe.width = '100%';
+      iframe.height = '100%';
+      iframe.frameBorder = '0';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      iframe.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;';
+
+      // Insert iframe before video info
+      const videoInfo = modalContent.querySelector('.video-info');
+      modalContent.insertBefore(iframe, videoInfo);
+    } else {
+      // Show HTML5 video player
+      this.videoPlayer.style.display = 'block';
+
+      // Remove YouTube iframe if any
+      const existingIframe = modalContent.querySelector('.youtube-iframe');
+      if (existingIframe) {
+        existingIframe.remove();
+      }
+
+      // Clear previous sources
+      this.videoPlayer.innerHTML = '';
+
+      // Add video source with fallback
+      const source = document.createElement('source');
+      source.src = video.url;
+      source.type = this.getMimeType(video.ext);
+      this.videoPlayer.appendChild(source);
+
+      // Add fallback text
+      const fallback = document.createElement('p');
+      fallback.textContent = 'Your browser doesn\'t support this video format. Please try a different browser or download the video.';
+      this.videoPlayer.appendChild(fallback);
+
+      this.videoPlayer.play();
+    }
+
+    // Show modal
     this.videoModal.classList.add('active');
-    this.videoPlayer.play();
 
     // Prevent body scroll
     document.body.style.overflow = 'hidden';
@@ -182,8 +238,17 @@ class VideoGallery {
    */
   closeModal() {
     this.videoModal.classList.remove('active');
+
+    // Stop HTML5 video
     this.videoPlayer.pause();
     this.videoPlayer.currentTime = 0;
+
+    // Remove YouTube iframe if present
+    const iframe = this.videoModal.querySelector('.youtube-iframe');
+    if (iframe) {
+      iframe.remove();
+    }
+
     document.body.style.overflow = '';
   }
 

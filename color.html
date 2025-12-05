@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="assets/css/base.css">
     <link rel="stylesheet" href="assets/css/navigation.css">
     <link rel="stylesheet" href="assets/css/gallery.css">
+    <link rel="stylesheet" href="assets/css/gallery-featured.css">
     <link rel="stylesheet" href="assets/css/lightbox.css">
     <link rel="stylesheet" href="assets/css/animations.css">
 </head>
@@ -53,24 +54,18 @@
         <!-- Collection Images Grid (Detail View) -->
         <div id="collectionView" class="gallery-view" style="display: none;">
             <div class="collection-header">
-                <button class="back-button" id="backBtn">← Back to Collections</button>
+                <button class="back-button" id="backBtn">← Back</button>
                 <h2 id="collectionTitle" class="collection-title"></h2>
             </div>
 
-            <div class="gallery-grid"></div>
+            <!-- Film Strip Carousel -->
+            <div class="film-strip-container">
+                <div class="film-strip" id="filmStrip"></div>
+            </div>
+
             <div class="image-counter">Loading...</div>
         </div>
 
-    </div>
-
-    <!-- Lightbox -->
-    <div class="lightbox" id="lightbox">
-        <button class="lightbox-close" aria-label="Close lightbox">&times;</button>
-        <button class="lightbox-prev" aria-label="Previous image">‹</button>
-        <button class="lightbox-next" aria-label="Next image">›</button>
-        <div class="lightbox-content">
-            <img src="" alt="" id="lightbox-image">
-        </div>
     </div>
 
     <!-- Footer -->
@@ -79,8 +74,8 @@
     </footer>
 
     <!-- JavaScript Files -->
-    <script src="assets/js/gallery.js"></script>
     <script src="assets/js/lightbox.js"></script>
+    <script src="assets/js/gallery.js"></script>
     <script>
         document.querySelector('footer').addEventListener('click', function(e) {
             if (e.shiftKey) {

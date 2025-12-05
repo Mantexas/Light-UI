@@ -26,6 +26,7 @@ class AdminPanel {
     if (this.isAuthenticated) {
       this.showDashboard();
       this.loadStats();
+      this.setupHomepageEditor();
       this.setupAboutEditor();
       this.setupArticleEditor();
       this.setupGalleryManagement();
@@ -49,7 +50,11 @@ class AdminPanel {
       this.isAuthenticated = true;
       this.showDashboard();
       this.loadStats();
+      this.setupHomepageEditor();
+      this.setupAboutEditor();
       this.setupArticleEditor();
+      this.setupGalleryManagement();
+      this.setupUploadHandlers();
     } else {
       this.loginError.textContent = 'Invalid username or password';
       this.loginError.style.display = 'block';
@@ -122,9 +127,9 @@ class AdminPanel {
       let galleryCount = 0;
       let videosCount = 0;
 
-      // Try to load gallery from new structure (images/gallery/)
+      // Try to load gallery collections from images/
       try {
-        const galleryResponse = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery');
+        const galleryResponse = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images');
         if (galleryResponse.ok) {
           const folders = await galleryResponse.json();
           // Count images in all collections
@@ -171,6 +176,67 @@ class AdminPanel {
     } catch (error) {
       console.error('Error loading stats:', error);
     }
+  }
+
+  // ==================== HOMEPAGE EDITOR ====================
+
+  setupHomepageEditor() {
+    const form = document.getElementById('homepageForm');
+    if (form) {
+      form.addEventListener('submit', (e) => this.handleHomepageSubmit(e));
+      form.addEventListener('reset', (e) => this.handleHomepageReset(e));
+      this.loadHomepageContent();
+    }
+  }
+
+  loadHomepageContent() {
+    const defaults = {
+      heroTitle: 'Immerse yourself in a curated selection of fine art pieces that capture nature\'s beauty.',
+      heroDescription: 'Meticulously crafted and printed directly on exceptional materials such as aluminum, glass, or the finest Hahnemühle paper, each piece tells its own story, offering a moment of reflection, wonder, and connection, designed to last 100 years.',
+      ctaButtonText: 'VISIT GALLERY',
+      ctaButtonLink: 'color.html'
+    };
+
+    const stored = localStorage.getItem('homepageContent');
+    const content = stored ? JSON.parse(stored) : defaults;
+
+    document.getElementById('heroTitle').value = content.heroTitle;
+    document.getElementById('heroDescription').value = content.heroDescription;
+    document.getElementById('ctaButtonText').value = content.ctaButtonText;
+    document.getElementById('ctaButtonLink').value = content.ctaButtonLink;
+  }
+
+  handleHomepageSubmit(e) {
+    e.preventDefault();
+
+    const content = {
+      heroTitle: document.getElementById('heroTitle').value.trim(),
+      heroDescription: document.getElementById('heroDescription').value.trim(),
+      ctaButtonText: document.getElementById('ctaButtonText').value.trim(),
+      ctaButtonLink: document.getElementById('ctaButtonLink').value.trim(),
+      lastUpdated: new Date().toISOString()
+    };
+
+    // Validation
+    if (!content.heroTitle || !content.heroDescription || !content.ctaButtonText || !content.ctaButtonLink) {
+      this.showNotification('All fields are required!', 'error');
+      return;
+    }
+
+    if (!content.ctaButtonLink.match(/\.(html|htm)$/)) {
+      this.showNotification('CTA link must be an HTML file (e.g., color.html)', 'error');
+      return;
+    }
+
+    localStorage.setItem('homepageContent', JSON.stringify(content));
+    this.showNotification('Homepage content saved successfully! Refresh the homepage to see changes.');
+  }
+
+  handleHomepageReset(e) {
+    e.preventDefault();
+    localStorage.removeItem('homepageContent');
+    this.loadHomepageContent();
+    this.showNotification('Homepage content reset to defaults.');
   }
 
   // ==================== ABOUT EDITOR ====================
@@ -411,7 +477,7 @@ class AdminPanel {
     grid.innerHTML = '<p class="loading">Loading images...</p>';
 
     try {
-      const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery');
+      const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images');
       const folders = await response.json();
 
       if (!Array.isArray(folders)) {
@@ -422,7 +488,7 @@ class AdminPanel {
       let allImages = [];
 
       for (const folder of folders) {
-        if (folder.type === 'dir') {
+        if (folder.type === 'dir' && folder.name !== 'homepage') {
           try {
             const collResponse = await fetch(folder.url);
             const files = await collResponse.json();
@@ -431,7 +497,7 @@ class AdminPanel {
               allImages = allImages.concat(images.map(img => ({
                 name: img.name,
                 collection: folder.name,
-                url: `images/gallery/${folder.name}/${img.name}`
+                url: `images/${folder.name}/${img.name}`
               })));
             }
           } catch (e) {
@@ -729,95 +795,85 @@ class AdminPanel {
   // ==================== GALLERY MANAGEMENT ====================
 
   setupGalleryManagement() {
-    // Initialize on first load
-    if (localStorage.getItem('galleries') === null) {
-      this.initializeSampleGalleries();
-    }
+    // Load actual images from GitHub
+    this.loadRealGalleryImages();
+  }
 
-    // Load initial gallery data
-    this.loadGalleries();
+  async loadRealGalleryImages() {
+    const grid = document.getElementById('collectionImagesGrid');
+    if (!grid) return;
 
-    // Setup event listeners
-    const newCollectionBtn = document.getElementById('newCollectionBtn');
-    const createCollectionBtn = document.getElementById('createCollectionBtn');
-    const cancelCollectionBtn = document.getElementById('cancelCollectionBtn');
-    const galleryInput = document.getElementById('galleryInput');
-    const galleryUploadArea = document.getElementById('galleryUploadArea');
-    const sortGallery = document.getElementById('sortGallery');
-    const selectAllImages = document.getElementById('selectAllImages');
-    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
-    const renameCollectionBtn = document.getElementById('renameCollectionBtn');
-    const confirmRenameBtn = document.getElementById('confirmRenameBtn');
-    const cancelRenameBtn = document.getElementById('cancelRenameBtn');
-    const deleteCollectionBtn = document.getElementById('deleteCollectionBtn');
+    grid.innerHTML = '<p class="loading">Loading gallery images...</p>';
 
-    if (newCollectionBtn) {
-      newCollectionBtn.addEventListener('click', () => this.showNewCollectionForm());
-    }
-    if (createCollectionBtn) {
-      createCollectionBtn.addEventListener('click', () => this.createCollection());
-    }
-    if (cancelCollectionBtn) {
-      cancelCollectionBtn.addEventListener('click', () => this.hideNewCollectionForm());
-    }
+    try {
+      const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images');
+      const folders = await response.json();
 
-    if (galleryUploadArea) {
-      galleryUploadArea.addEventListener('click', () => galleryInput?.click());
-      galleryUploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        galleryUploadArea.classList.add('drag-over');
-      });
-      galleryUploadArea.addEventListener('dragleave', () => {
-        galleryUploadArea.classList.remove('drag-over');
-      });
-      galleryUploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        galleryUploadArea.classList.remove('drag-over');
-        if (e.dataTransfer.files.length > 0) {
-          this.handleGalleryUpload(e.dataTransfer.files);
+      if (!Array.isArray(folders)) {
+        grid.innerHTML = '<p class="loading">No collections found.</p>';
+        return;
+      }
+
+      const collections = folders.filter(f => f.type === 'dir' && f.name !== 'homepage');
+
+      if (collections.length === 0) {
+        grid.innerHTML = '<p class="loading">No collections. Create folders in images/</p>';
+        return;
+      }
+
+      let allImages = [];
+
+      // Load images from all collections
+      for (const collection of collections) {
+        try {
+          const collResponse = await fetch(collection.url);
+          const files = await collResponse.json();
+          if (Array.isArray(files)) {
+            const images = files.filter(f => this.isImageFile(f.name));
+            allImages = allImages.concat(images.map(img => ({
+              name: img.name,
+              collection: collection.name,
+              size: img.size,
+              url: `images/${collection.name}/${img.name}`
+            })));
+          }
+        } catch (e) {
+          console.error('Error loading collection:', collection.name);
         }
-      });
-    }
+      }
 
-    if (galleryInput) {
-      galleryInput.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-          this.handleGalleryUpload(e.target.files);
-        }
-      });
-    }
+      if (allImages.length === 0) {
+        grid.innerHTML = '<p class="loading">No images in any collection.</p>';
+        return;
+      }
 
-    if (sortGallery) {
-      sortGallery.addEventListener('change', () => this.renderCurrentCollectionImages());
-    }
+      // Render with thumbnails
+      grid.innerHTML = allImages.map(file => `
+        <div class="gallery-image-item">
+          <img src="${file.url}" alt="${this.escapeHtml(file.name)}" loading="lazy">
+          <div class="gallery-image-info">
+            <div class="gallery-image-name" title="${this.escapeHtml(file.name)}">${this.escapeHtml(file.name)}</div>
+            <div class="gallery-image-meta">
+              <span class="gallery-image-collection">${this.escapeHtml(file.collection)}</span>
+              <span class="gallery-image-size">${this.formatFileSize(file.size)}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
 
-    if (selectAllImages) {
-      selectAllImages.addEventListener('change', (e) => {
-        document.querySelectorAll('.gallery-image-checkbox').forEach(checkbox => {
-          checkbox.checked = e.target.checked;
+      // Add click handlers to view in lightbox
+      document.querySelectorAll('.gallery-image-item').forEach((item, index) => {
+        item.addEventListener('click', () => {
+          const allUrls = allImages.map(img => img.url);
+          if (window.AdvancedLightbox) {
+            window.AdvancedLightbox.open(allImages[index].url, allUrls);
+          }
         });
-        this.updateDeleteSelectedButton();
       });
-    }
 
-    if (deleteSelectedBtn) {
-      deleteSelectedBtn.addEventListener('click', () => this.deleteSelectedImages());
-    }
-
-    if (renameCollectionBtn) {
-      renameCollectionBtn.addEventListener('click', () => this.showRenameForm());
-    }
-
-    if (confirmRenameBtn) {
-      confirmRenameBtn.addEventListener('click', () => this.confirmRenameCollection());
-    }
-
-    if (cancelRenameBtn) {
-      cancelRenameBtn.addEventListener('click', () => this.hideRenameForm());
-    }
-
-    if (deleteCollectionBtn) {
-      deleteCollectionBtn.addEventListener('click', () => this.deleteCurrentCollection());
+    } catch (error) {
+      console.error('Error loading gallery:', error);
+      grid.innerHTML = '<p class="loading">Error loading gallery.</p>';
     }
   }
 
@@ -1296,7 +1352,7 @@ class AdminPanel {
     galleryList.innerHTML = '<p class="loading">Loading gallery...</p>';
 
     try {
-      const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images/gallery');
+      const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images');
       const folders = await response.json();
 
       if (!Array.isArray(folders)) {
@@ -1304,10 +1360,10 @@ class AdminPanel {
         return;
       }
 
-      const collections = folders.filter(f => f.type === 'dir');
+      const collections = folders.filter(f => f.type === 'dir' && f.name !== 'homepage');
 
       if (collections.length === 0) {
-        galleryList.innerHTML = '<p class="loading">No collections. Create folders in images/gallery/</p>';
+        galleryList.innerHTML = '<p class="loading">No collections. Create folders in images/</p>';
         return;
       }
 
@@ -1339,14 +1395,14 @@ class AdminPanel {
       galleryList.innerHTML = allImages.map(file => `
         <div class="file-item">
           <div class="file-thumbnail">
-            <img src="images/gallery/${file.collection}/${file.name}" alt="${file.name}" style="width: 100%; height: 100%; object-fit: cover;">
+            <img src="images/${file.collection}/${file.name}" alt="${file.name}" style="width: 100%; height: 100%; object-fit: cover;">
           </div>
           <div class="file-info">
             <div class="file-name">${file.name}</div>
             <div class="file-size">${this.formatFileSize(file.size)}</div>
             <div class="file-collection">${file.collection}</div>
             <div class="file-actions">
-              <a href="images/gallery/${file.collection}/${file.name}" target="_blank" class="file-action-btn">View</a>
+              <a href="images/${file.collection}/${file.name}" target="_blank" class="file-action-btn">View</a>
             </div>
           </div>
         </div>
@@ -1397,7 +1453,7 @@ class AdminPanel {
     if (files.length === 0) return;
 
     this.showNotification(
-      `${files.length} file${files.length !== 1 ? 's' : ''} selected. Push to GitHub:\n\nVideos: images/videos/large/\nGallery: images/gallery/[collection-name]/`,
+      `${files.length} file${files.length !== 1 ? 's' : ''} selected. Push to GitHub:\n\nGallery: images/[collection-name]/\nHomepage: images/homepage/`,
       'info'
     );
   }

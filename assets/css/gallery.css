@@ -3,9 +3,9 @@
    ============================================
 
    THIS PAGE MUST HAVE:
-   • .gallery-container with padding: var(--space-lg) var(--space-xl)
-   • @media (max-width: 768px) with padding: var(--space-lg) var(--space-md)
-   • @media (max-width: 480px) with padding: var(--space-lg) var(--space-md)
+   • .gallery-container with padding: 48px 60px (desktop)
+   • @media (max-width: 768px) with padding: 40px 32px (tablet) or 32px 24px (mobile)
+   • @media (max-width: 480px) with padding: 40px 32px (tablet) or 32px 24px (mobile)
 
    READ: ../../../STYLE_CONSTITUTION.md
    ============================================ */
@@ -16,11 +16,10 @@
 
 @import 'variables.css';
 
-/* Hero Section */
+/* Hero Section - Minimal */
 .gallery-hero {
   background: var(--bg-primary);
-  padding: var(--space-2xl) var(--space-xl) var(--space-xl) var(--space-xl);
-  text-align: center;
+  padding: var(--space-lg) var(--space-xl) var(--space-md) var(--space-xl);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -30,21 +29,15 @@
 }
 
 .gallery-hero-content h1 {
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-medium);
-  margin: 0 0 var(--space-md) 0;
+  margin: 0;
   letter-spacing: var(--letter-spacing-tight);
   color: var(--text-primary);
 }
 
 .gallery-hero-content p {
-  font-size: var(--font-size-lg);
-  color: var(--text-secondary);
-  margin: 0;
-  line-height: var(--line-height-relaxed);
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+  display: none;
 }
 
 /* Container */
@@ -52,21 +45,21 @@
 .gallery-container {
   max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: var(--space-lg) var(--space-xl);
+  padding: 48px 60px (desktop);
 }
 
 /* Collections Grid (Hub View) */
 .collections-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 380px));
   gap: var(--space-lg);
   margin-bottom: var(--space-2xl);
+  justify-content: start;
 }
 
 .collection-card {
   background: white;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
   overflow: hidden;
   transition: all var(--transition-base);
   cursor: pointer;
@@ -76,20 +69,16 @@
 }
 
 .collection-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--accent);
+  border-color: #000;
 }
 
 .collection-thumbnail {
   width: 100%;
-  height: 200px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  height: 240px;
+  background: #f5f5f5;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-medium);
   overflow: hidden;
 }
 
@@ -126,18 +115,17 @@
 }
 
 .collection-header {
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-lg);
   display: flex;
   align-items: center;
-  gap: var(--space-lg);
+  gap: var(--space-md);
 }
 
 .back-button {
-  padding: var(--space-md) var(--space-lg);
+  padding: var(--space-sm) var(--space-md);
   background: white;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-light);
   letter-spacing: 0.05em;
   cursor: pointer;
@@ -146,12 +134,12 @@
 }
 
 .back-button:hover {
-  border-color: var(--accent);
+  border-color: #000;
   background: var(--bg-secondary);
 }
 
 .collection-title {
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-medium);
   margin: 0;
   color: var(--text-primary);
@@ -350,7 +338,11 @@
   }
 
   .gallery-container {
-    padding: var(--space-lg) var(--space-md);
+    padding: 40px 32px (tablet) or 32px 24px (mobile);
+  }
+
+  .collections-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
 
   .gallery-grid {
@@ -361,7 +353,7 @@
 
 @media (max-width: 480px) {
   .gallery-hero {
-    padding: var(--space-lg) var(--space-md);
+    padding: 40px 32px (tablet) or 32px 24px (mobile);
   }
 
   .gallery-hero-content h1 {
@@ -373,7 +365,11 @@
   }
 
   .gallery-container {
-    padding: var(--space-lg) var(--space-md);
+    padding: 40px 32px (tablet) or 32px 24px (mobile);
+  }
+
+  .collections-grid {
+    grid-template-columns: 1fr;
   }
 
   .gallery-grid {
