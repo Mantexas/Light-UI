@@ -240,29 +240,21 @@ class AdvancedLightbox {
   }
 
   next() {
-    this.lbimg.classList.add('changing');
-    setTimeout(() => {
-      this.currentIndex = (this.currentIndex + 1) % this.images.length;
-      this.lbimg.src = this.images[this.currentIndex];
-      this.updateCounter();
-      this.updateThumbnails();
-      this.preloadImages();
-      this.lbimg.classList.remove('changing');
-      this.resetZoomPan();
-    }, 150);
+    this.currentIndex = (this.currentIndex + 1) % this.images.length;
+    this.lbimg.src = this.images[this.currentIndex];
+    this.updateCounter();
+    this.updateThumbnails();
+    this.preloadImages();
+    this.resetZoomPan();
   }
 
   prev() {
-    this.lbimg.classList.add('changing');
-    setTimeout(() => {
-      this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
-      this.lbimg.src = this.images[this.currentIndex];
-      this.updateCounter();
-      this.updateThumbnails();
-      this.preloadImages();
-      this.lbimg.classList.remove('changing');
-      this.resetZoomPan();
-    }, 150);
+    this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+    this.lbimg.src = this.images[this.currentIndex];
+    this.updateCounter();
+    this.updateThumbnails();
+    this.preloadImages();
+    this.resetZoomPan();
   }
 
   resetZoomPan() {
@@ -310,16 +302,12 @@ class AdvancedLightbox {
   }
 
   jumpTo(index) {
-    this.lbimg.classList.add('changing');
-    setTimeout(() => {
-      this.currentIndex = index;
-      this.lbimg.src = this.images[this.currentIndex];
-      this.updateCounter();
-      this.updateThumbnails();
-      this.preloadImages();
-      this.lbimg.classList.remove('changing');
-      this.resetZoomPan();
-    }, 150);
+    this.currentIndex = index;
+    this.lbimg.src = this.images[this.currentIndex];
+    this.updateCounter();
+    this.updateThumbnails();
+    this.preloadImages();
+    this.resetZoomPan();
   }
 
   preloadImages() {
