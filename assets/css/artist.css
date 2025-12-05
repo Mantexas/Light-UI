@@ -20,7 +20,7 @@
 .about-container {
   max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: 48px 60px (desktop);
+  padding: var(--space-xl) var(--space-2xl);
 }
 
 /* About Header */
@@ -197,7 +197,7 @@
 /* Responsive */
 @media (max-width: 768px) {
   .about-container {
-    padding: 40px 32px (tablet) or 32px 24px (mobile);
+    padding: var(--space-lg) var(--space-md);
   }
 
   .about-main {
@@ -217,7 +217,7 @@
 
 @media (max-width: 480px) {
   .about-container {
-    padding: 40px 32px (tablet) or 32px 24px (mobile);
+    padding: var(--space-lg) var(--space-sm);
   }
 
   .about-header h1 {

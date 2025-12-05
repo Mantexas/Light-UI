@@ -51,7 +51,7 @@
 .video-container {
   max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: 48px 60px (desktop);
+  padding: var(--space-xl) var(--space-2xl);
 }
 
 /* Video Grid */
@@ -262,7 +262,7 @@
   }
 
   .video-container {
-    padding: 40px 32px (tablet) or 32px 24px (mobile);
+    padding: var(--space-lg) var(--space-md);
   }
 
   .video-grid {
@@ -285,7 +285,7 @@
 
 @media (max-width: 480px) {
   .video-hero {
-    padding: 40px 32px (tablet) or 32px 24px (mobile);
+    padding: var(--space-lg) var(--space-sm);
   }
 
   .video-hero-content h1 {
@@ -297,7 +297,7 @@
   }
 
   .video-container {
-    padding: 40px 32px (tablet) or 32px 24px (mobile);
+    padding: var(--space-lg) var(--space-sm);
   }
 
   .video-grid {
