@@ -20,7 +20,7 @@
 .store-container {
   max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: 48px 60px (desktop);
+  padding: var(--space-xl) var(--space-2xl);
 }
 
 /* Store Intro */
@@ -160,7 +160,7 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .store-container {
-    padding: 40px 32px (tablet) or 32px 24px (mobile);
+    padding: var(--space-lg) var(--space-md);
   }
 
   .store-gallery {
@@ -179,7 +179,7 @@
 
 @media (max-width: 480px) {
   .store-container {
-    padding: 40px 32px (tablet) or 32px 24px (mobile);
+    padding: var(--space-lg) var(--space-sm);
   }
 
   .store-intro h1 {
@@ -195,7 +195,7 @@
   }
 
   .order-form {
-    padding: 40px 32px (tablet) or 32px 24px (mobile);
+    padding: var(--space-lg) var(--space-sm);
   }
 
   .form-group {

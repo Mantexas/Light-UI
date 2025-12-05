@@ -130,6 +130,7 @@ The best photographs aren't always technically perfect—they're the ones that m
     document.getElementById('articleBody').innerHTML = this.parseMarkdown(article.body);
 
     this.articleModal.classList.add('active');
+    this.articleModal.scrollTop = 0; // Scroll to top of modal
     document.body.style.overflow = 'hidden';
   }
 

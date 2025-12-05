@@ -41,11 +41,11 @@
 }
 
 /* Container */
-/* Alignment: Matches navigation and footer horizontal padding (--space-xl = 96px) */
+/* Desktop: 48px vertical, 60px horizontal */
 .gallery-container {
   max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: 48px 60px (desktop);
+  padding: var(--space-xl) var(--space-2xl);
 }
 
 /* Collections Grid (Hub View) */
@@ -338,7 +338,7 @@
   }
 
   .gallery-container {
-    padding: 40px 32px (tablet) or 32px 24px (mobile);
+    padding: var(--space-lg) var(--space-md);
   }
 
   .collections-grid {
@@ -353,7 +353,7 @@
 
 @media (max-width: 480px) {
   .gallery-hero {
-    padding: 40px 32px (tablet) or 32px 24px (mobile);
+    padding: var(--space-lg) var(--space-sm);
   }
 
   .gallery-hero-content h1 {
@@ -365,7 +365,7 @@
   }
 
   .gallery-container {
-    padding: 40px 32px (tablet) or 32px 24px (mobile);
+    padding: var(--space-lg) var(--space-sm);
   }
 
   .collections-grid {

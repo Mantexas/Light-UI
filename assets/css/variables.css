@@ -1,25 +1,25 @@
 /* ============================================
-   ⚠️  STYLE CONSTITUTION VARIABLES
-   DO NOT MODIFY WITHOUT EXPLICIT APPROVAL
+   ⚠️  GLOBAL DESIGN SYSTEM - SPACING STANDARD
    ============================================
 
-   SPACING SCALE (IMMUTABLE):
-   --space-xs:   8px   (never used for containers)
-   --space-sm:   16px  (internal spacing only)
-   --space-md:   32px  (responsive padding - mobile/tablet)
-   --space-lg:   64px  (vertical padding - ALL pages)
-   --space-xl:   96px  (horizontal padding - desktop)
-   --space-2xl:  128px (margins between major sections)
+   SPACING SCALE (8px baseline):
+   --space-xs:   8px   (micro spacing, small gaps)
+   --space-sm:   16px  (internal spacing, card gaps)
+   --space-md:   24px  (mobile horizontal padding)
+   --space-lg:   32px  (section spacing, mobile vertical)
+   --space-xl:   48px  (desktop vertical padding)
+   --space-2xl:  60px  (desktop horizontal padding)
+   --space-3xl:  128px (major section margins)
 
    USAGE RULES:
-   ✅ Container padding: var(--space-lg) var(--space-xl)
-   ✅ Responsive padding: var(--space-lg) var(--space-md)
-   ✅ Interior spacing: var(--space-md), var(--space-lg)
+   ✅ Desktop container: padding: var(--space-xl) var(--space-2xl)  /* 48px 60px */
+   ✅ Tablet/mobile: padding: var(--space-lg) var(--space-md)       /* 32px 24px */
+   ✅ Small mobile: padding: var(--space-lg) var(--space-sm)        /* 32px 16px */
+   ✅ Card/section gaps: var(--space-md) or var(--space-lg)
+   ✅ Small gaps: var(--space-xs) or var(--space-sm)
    ❌ NO hardcoded pixel values
    ❌ NO creating new spacing variables
-   ❌ NO arbitrary spacing scales
 
-   READ: ../../STYLE_CONSTITUTION.md
    ============================================ */
 
 /* ============================================
