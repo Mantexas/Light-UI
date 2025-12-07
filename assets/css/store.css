@@ -160,7 +160,7 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .store-container {
-    padding: var(--space-lg) var(--space-md);
+    padding: 40px 32px;
   }
 
   .store-gallery {
@@ -179,7 +179,7 @@
 
 @media (max-width: 480px) {
   .store-container {
-    padding: var(--space-lg) var(--space-sm);
+    padding: var(--space-lg) var(--space-md);
   }
 
   .store-intro h1 {
