@@ -1,10 +1,5 @@
-/* ============================================
-   Animations & Keyframes
-   ============================================ */
+/* Animations */
 
-/* Variables are loaded via <link> in HTML - no @import needed */
-
-/* Fade In Animation */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -16,9 +11,12 @@
   }
 }
 
-/* Staggered Gallery Item Animation */
+.fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
 .gallery-item {
-  animation: fadeIn var(--transition-base) ease-out backwards;
+  animation: fadeIn 250ms ease-out backwards;
 }
 
 .gallery-item:nth-child(1) { animation-delay: 50ms; }
@@ -32,48 +30,28 @@
 .gallery-item:nth-child(9) { animation-delay: 450ms; }
 .gallery-item:nth-child(n+10) { animation-delay: 500ms; }
 
-/* Loading Shimmer */
 @keyframes loading {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
-/* Lightbox Fade In */
 @keyframes lightboxFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Lightbox Scale In */
 @keyframes lightboxScaleIn {
-  from {
-    transform: scale(0.9);
-  }
-  to {
-    transform: scale(1);
-  }
+  from { transform: scale(0.9); }
+  to { transform: scale(1); }
 }
 
-/* Smooth Scroll */
 html {
   scroll-behavior: smooth;
 }
 
-/* Reduce Motion (Accessibility) */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
