@@ -97,7 +97,7 @@
     .hero {
         grid-template-columns: 1fr;
         gap: var(--space-xl);
-        padding: var(--space-lg) var(--space-md);
+        padding: 40px 32px;
     }
 
     .hero-title {
@@ -121,7 +121,7 @@
 
 @media (max-width: 480px) {
     .hero {
-        padding: var(--space-lg) var(--space-sm);
+        padding: var(--space-lg) var(--space-md);
     }
 
     .hero-title {

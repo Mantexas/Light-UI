@@ -326,7 +326,7 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .gallery-hero {
-    padding: var(--space-xl) var(--space-md) var(--space-lg) var(--space-md);
+    padding: var(--space-xl) 32px var(--space-lg) 32px;
   }
 
   .gallery-hero-content h1 {
@@ -338,7 +338,7 @@
   }
 
   .gallery-container {
-    padding: var(--space-lg) var(--space-md);
+    padding: 40px 32px;
   }
 
   .collections-grid {
@@ -353,7 +353,7 @@
 
 @media (max-width: 480px) {
   .gallery-hero {
-    padding: var(--space-lg) var(--space-sm);
+    padding: var(--space-lg) var(--space-md);
   }
 
   .gallery-hero-content h1 {
@@ -365,7 +365,7 @@
   }
 
   .gallery-container {
-    padding: var(--space-lg) var(--space-sm);
+    padding: var(--space-lg) var(--space-md);
   }
 
   .collections-grid {

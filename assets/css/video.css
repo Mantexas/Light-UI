@@ -250,7 +250,7 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .video-hero {
-    padding: var(--space-xl) var(--space-md) var(--space-lg) var(--space-md);
+    padding: var(--space-xl) 32px var(--space-lg) 32px;
   }
 
   .video-hero-content h1 {
@@ -262,7 +262,7 @@
   }
 
   .video-container {
-    padding: var(--space-lg) var(--space-md);
+    padding: 40px 32px;
   }
 
   .video-grid {
@@ -285,7 +285,7 @@
 
 @media (max-width: 480px) {
   .video-hero {
-    padding: var(--space-lg) var(--space-sm);
+    padding: var(--space-lg) var(--space-md);
   }
 
   .video-hero-content h1 {
@@ -297,7 +297,7 @@
   }
 
   .video-container {
-    padding: var(--space-lg) var(--space-sm);
+    padding: var(--space-lg) var(--space-md);
   }
 
   .video-grid {

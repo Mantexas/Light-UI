@@ -317,7 +317,7 @@
 /* Responsive */
 @media (max-width: 768px) {
   .stories-container {
-    padding: var(--space-lg) var(--space-md);
+    padding: 40px 32px;
   }
 
   .stories-grid {
@@ -339,7 +339,7 @@
 
 @media (max-width: 480px) {
   .stories-container {
-    padding: var(--space-lg) var(--space-sm);
+    padding: var(--space-lg) var(--space-md);
   }
 
   .stories-grid {

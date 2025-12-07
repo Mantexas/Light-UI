@@ -197,7 +197,7 @@
 /* Responsive */
 @media (max-width: 768px) {
   .about-container {
-    padding: var(--space-lg) var(--space-md);
+    padding: 40px 32px;
   }
 
   .about-main {
@@ -217,7 +217,7 @@
 
 @media (max-width: 480px) {
   .about-container {
-    padding: var(--space-lg) var(--space-sm);
+    padding: var(--space-lg) var(--space-md);
   }
 
   .about-header h1 {
