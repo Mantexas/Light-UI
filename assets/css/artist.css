@@ -1,20 +1,4 @@
-/* ============================================
-   ⚠️  STYLE CONSTITUTION ENFORCEMENT
-   ============================================
-
-   THIS PAGE MUST HAVE:
-   • .about-container with padding: 48px 60px (desktop)
-   • @media (max-width: 768px) with padding: 40px 32px (tablet) or 32px 24px (mobile)
-   • @media (max-width: 480px) with padding: 40px 32px (tablet) or 32px 24px (mobile)
-
-   READ: ../../../STYLE_CONSTITUTION.md
-   ============================================ */
-
-/* ============================================
-   About / Artist Page Styles
-   ============================================ */
-
-/* Variables are loaded via <link> in HTML - no @import needed */
+/* About Page Styles */
 
 /* Container */
 .about-container {

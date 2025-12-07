@@ -1,22 +1,6 @@
-/* ============================================
-   ⚠️  STYLE CONSTITUTION ENFORCEMENT
-   ============================================
+/* Gallery Page Styles */
 
-   THIS PAGE MUST HAVE:
-   • .gallery-container with padding: 48px 60px (desktop)
-   • @media (max-width: 768px) with padding: 40px 32px (tablet) or 32px 24px (mobile)
-   • @media (max-width: 480px) with padding: 40px 32px (tablet) or 32px 24px (mobile)
-
-   READ: ../../../STYLE_CONSTITUTION.md
-   ============================================ */
-
-/* ============================================
-   Gallery Grid Layout
-   ============================================ */
-
-/* Variables are loaded via <link> in HTML - no @import needed */
-
-/* Hero Section - Minimal */
+/* Hero Section */
 .gallery-hero {
   background: var(--bg-primary);
   padding: var(--space-lg) var(--space-xl) var(--space-md) var(--space-xl);
