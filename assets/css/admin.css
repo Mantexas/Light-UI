@@ -18,7 +18,7 @@
    clearer navigation, and refined interactions
    ============================================ */
 
-@import 'variables.css';
+/* Variables are loaded via <link> in HTML - no @import needed */
 
 /* ========== PAGE SETUP ========== */
 

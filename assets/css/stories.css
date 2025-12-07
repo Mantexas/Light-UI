@@ -14,7 +14,7 @@
    Stories Page Styles
    ============================================ */
 
-@import 'variables.css';
+/* Variables are loaded via <link> in HTML - no @import needed */
 
 /* Container */
 .stories-container {

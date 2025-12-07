@@ -2,7 +2,7 @@
    Animations & Keyframes
    ============================================ */
 
-@import 'variables.css';
+/* Variables are loaded via <link> in HTML - no @import needed */
 
 /* Fade In Animation */
 @keyframes fadeIn {

@@ -2,7 +2,7 @@
    Advanced Lightbox - Full Featured
    ============================================ */
 
-@import 'variables.css';
+/* Variables are loaded via <link> in HTML - no @import needed */
 
 /* Lightbox overlay */
 .lightbox {
