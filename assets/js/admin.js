@@ -943,6 +943,12 @@ class AdminPanel {
 
   loadGalleryCollections() {
     const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
+            
+        // Ensure galleries are initialized
+        if (!galleries || Object.keys(galleries).length === 0) {
+            galleries = { 'Sample Collection': [] };
+            localStorage.setItem('galleries', JSON.stringify(galleries));
+        }
     this.renderCollectionsList(galleries);
 
     // Reset view
@@ -1399,6 +1405,37 @@ class AdminPanel {
     // Add export/import buttons dynamically
     const settingsTab = document.getElementById('settingsTab');
     if (!settingsTab) return;
+
+        // Add navigation visibility section
+    const navSection = document.createElement('div');
+    navSection.className = 'settings-section';
+    navSection.innerHTML = `
+        <h3>Navigation Visibility</h3>
+        <p>Control which menu items appear in the navigation bar.</p>
+        <div style="margin-top: var(--space-md);">
+            <label style="display: flex; align-items: center; gap: var(--space-sm); cursor: pointer;">
+                <input type="checkbox" id="storeVisibilityToggle" style="width: 20px; height: 20px;">
+                <span>Show Store in navigation</span>
+            </label>
+        </div>
+    `;
+    
+    if (!settingsTab.querySelector('.settings-section')) {
+        settingsTab.appendChild(navSection);
+    } else {
+        settingsTab.insertBefore(navSection, settingsTab.querySelector('.settings-section'));
+    }
+    
+    // Load current store visibility setting
+    const storeVisible = JSON.parse(localStorage.getItem('storeVisible') ?? 'true');
+    document.getElementById('storeVisibilityToggle').checked = storeVisible;
+    
+    // Handle store visibility toggle
+    document.getElementById('storeVisibilityToggle').addEventListener('change', (e) => {
+        localStorage.setItem('storeVisible', JSON.stringify(e.target.checked));
+        Toast.success(`Store ${e.target.checked ? 'shown' : 'hidden'} in navigation. Refresh to see changes.`);
+    });
+
 
     // Add data management section
     const dataSection = document.createElement('div');
