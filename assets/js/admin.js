@@ -1,12 +1,83 @@
 /**
- * Admin Panel - Comprehensive Implementation
- * Full article editor with live preview, reading time, image management
+ * Admin Panel - Complete Implementation
+ * Full CMS for managing gallery, articles, videos, and content
  */
 
 const ADMIN_CREDENTIALS = {
   username: 'admin',
   password: 'password123'
 };
+
+// ==================== TOAST NOTIFICATION SYSTEM ====================
+
+class Toast {
+  static container = null;
+
+  static init() {
+    if (!this.container) {
+      this.container = document.createElement('div');
+      this.container.className = 'toast-container';
+      document.body.appendChild(this.container);
+    }
+  }
+
+  static show(message, type = 'success', duration = 4000) {
+    this.init();
+
+    const icons = {
+      success: '✓',
+      error: '✕',
+      warning: '!',
+      info: 'i'
+    };
+
+    const titles = {
+      success: 'Success',
+      error: 'Error',
+      warning: 'Warning',
+      info: 'Info'
+    };
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+      <div class="toast-icon">${icons[type]}</div>
+      <div class="toast-content">
+        <p class="toast-title">${titles[type]}</p>
+        <p class="toast-message">${message}</p>
+      </div>
+      <button class="toast-close">×</button>
+    `;
+
+    this.container.appendChild(toast);
+
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn.addEventListener('click', () => this.dismiss(toast));
+
+    if (duration > 0) {
+      setTimeout(() => this.dismiss(toast), duration);
+    }
+
+    return toast;
+  }
+
+  static dismiss(toast) {
+    if (!toast || !toast.parentNode) return;
+    toast.classList.add('exiting');
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 250);
+  }
+
+  static success(message) { return this.show(message, 'success'); }
+  static error(message) { return this.show(message, 'error'); }
+  static warning(message) { return this.show(message, 'warning'); }
+  static info(message) { return this.show(message, 'info'); }
+}
+
+// ==================== MAIN ADMIN PANEL CLASS ====================
 
 class AdminPanel {
   constructor() {
@@ -15,6 +86,10 @@ class AdminPanel {
     this.loginForm = document.getElementById('loginForm');
     this.logoutBtn = document.getElementById('logoutBtn');
     this.loginError = document.getElementById('loginError');
+
+    this.currentCollection = null;
+    this.currentSortMethod = 'name';
+    this.selectedImages = new Set();
 
     this.isAuthenticated = this.checkAuth();
     this.init();
@@ -30,7 +105,8 @@ class AdminPanel {
       this.setupAboutEditor();
       this.setupArticleEditor();
       this.setupGalleryManagement();
-      this.setupUploadHandlers();
+      this.setupVideoManagement();
+      this.setupSettingsTab();
     } else {
       this.showLogin();
     }
@@ -54,7 +130,9 @@ class AdminPanel {
       this.setupAboutEditor();
       this.setupArticleEditor();
       this.setupGalleryManagement();
-      this.setupUploadHandlers();
+      this.setupVideoManagement();
+      this.setupSettingsTab();
+      Toast.success('Welcome back, Admin!');
     } else {
       this.loginError.textContent = 'Invalid username or password';
       this.loginError.style.display = 'block';
@@ -67,6 +145,7 @@ class AdminPanel {
     this.isAuthenticated = false;
     this.showLogin();
     this.loginForm.reset();
+    Toast.info('You have been logged out');
   }
 
   checkAuth() {
@@ -98,17 +177,14 @@ class AdminPanel {
   }
 
   switchTab(tabName) {
-    // Hide all tabs
     document.querySelectorAll('.admin-tab-content').forEach(tab => {
       tab.classList.remove('active');
     });
 
-    // Remove active from buttons
     document.querySelectorAll('.admin-tab-btn').forEach(btn => {
       btn.classList.remove('active');
     });
 
-    // Show selected tab
     document.getElementById(tabName + 'Tab').classList.add('active');
     document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
 
@@ -116,66 +192,86 @@ class AdminPanel {
     if (tabName === 'videos') {
       this.loadVideos();
     } else if (tabName === 'gallery') {
-      this.loadGallery();
+      this.loadGalleryCollections();
+    } else if (tabName === 'dashboard') {
+      this.loadStats();
     }
   }
 
   // ==================== DASHBOARD & STATS ====================
 
   async loadStats() {
-    try {
-      let galleryCount = 0;
-      let videosCount = 0;
+    const galleryCountEl = document.getElementById('galleryCount');
+    const videosCountEl = document.getElementById('videosCount');
+    const articleStatEl = document.querySelector('[data-stat="articles"]');
+    const storageEl = document.getElementById('storageUsed');
 
-      // Try to load gallery collections from images/
-      try {
-        const galleryResponse = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images');
-        if (galleryResponse.ok) {
-          const folders = await galleryResponse.json();
-          // Count images in all collections
+    // Show loading state
+    if (galleryCountEl) galleryCountEl.textContent = '...';
+    if (videosCountEl) videosCountEl.textContent = '...';
+
+    let galleryCount = 0;
+    let videosCount = 0;
+
+    // Count gallery images from localStorage
+    const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
+    Object.values(galleries).forEach(collection => {
+      galleryCount += collection.length;
+    });
+
+    // Try to also count from GitHub API
+    try {
+      const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images');
+      if (response.ok) {
+        const folders = await response.json();
+        if (Array.isArray(folders)) {
           for (const folder of folders) {
-            if (folder.type === 'dir') {
-              const collectionResponse = await fetch(folder.url);
-              const files = await collectionResponse.json();
-              if (Array.isArray(files)) {
-                galleryCount += files.filter(f => this.isImageFile(f.name)).length;
-              }
+            if (folder.type === 'dir' && folder.name !== 'homepage' && folder.name !== 'videos') {
+              try {
+                const collResponse = await fetch(folder.url);
+                const files = await collResponse.json();
+                if (Array.isArray(files)) {
+                  galleryCount += files.filter(f => this.isImageFile(f.name)).length;
+                }
+              } catch (e) { /* ignore */ }
             }
           }
         }
-      } catch (e) {
-        console.log('Gallery load from API failed, using local');
       }
-
-      // Load videos
-      try {
-        const videosResponse = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images/videos/large');
-        if (videosResponse.ok) {
-          const videoFiles = await videosResponse.json();
-          videosCount = Array.isArray(videoFiles) ? videoFiles.filter(f => this.isVideoFile(f.name)).length : 0;
-        }
-      } catch (e) {
-        console.log('Videos load failed');
-      }
-
-      // Load articles from localStorage
-      const articles = JSON.parse(localStorage.getItem('articles') || '[]');
-      const articlesCount = articles.length;
-
-      // Update UI
-      document.getElementById('galleryCount').textContent = galleryCount;
-      document.getElementById('videosCount').textContent = videosCount;
-      const articleStatEl = document.querySelector('[data-stat="articles"]');
-      if (articleStatEl) {
-        articleStatEl.textContent = articlesCount;
-      }
-
-      // Estimate storage
-      const totalSize = (galleryCount * 2) + (videosCount * 50);
-      document.getElementById('storageUsed').textContent = (totalSize / 1024).toFixed(1) + ' MB';
-    } catch (error) {
-      console.error('Error loading stats:', error);
+    } catch (e) {
+      console.log('GitHub API unavailable, using local data only');
     }
+
+    // Count videos
+    try {
+      const videosResponse = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images/videos/large');
+      if (videosResponse.ok) {
+        const videoFiles = await videosResponse.json();
+        videosCount = Array.isArray(videoFiles) ? videoFiles.filter(f => this.isVideoFile(f.name)).length : 0;
+      }
+    } catch (e) { /* ignore */ }
+
+    // Count articles
+    const articles = JSON.parse(localStorage.getItem('articles') || '[]');
+    const articlesCount = articles.length;
+
+    // Update UI
+    if (galleryCountEl) galleryCountEl.textContent = galleryCount;
+    if (videosCountEl) videosCountEl.textContent = videosCount;
+    if (articleStatEl) articleStatEl.textContent = articlesCount;
+
+    // Calculate storage used
+    let totalBytes = 0;
+    try {
+      for (let key in localStorage) {
+        if (localStorage.hasOwnProperty(key)) {
+          totalBytes += localStorage.getItem(key).length * 2; // UTF-16
+        }
+      }
+    } catch (e) { /* ignore */ }
+
+    const mbUsed = (totalBytes / (1024 * 1024)).toFixed(2);
+    if (storageEl) storageEl.textContent = `${mbUsed} MB`;
   }
 
   // ==================== HOMEPAGE EDITOR ====================
@@ -184,7 +280,7 @@ class AdminPanel {
     const form = document.getElementById('homepageForm');
     if (form) {
       form.addEventListener('submit', (e) => this.handleHomepageSubmit(e));
-      form.addEventListener('reset', (e) => this.handleHomepageReset(e));
+      document.getElementById('homepageResetBtn')?.addEventListener('click', (e) => this.handleHomepageReset(e));
       this.loadHomepageContent();
     }
   }
@@ -200,10 +296,10 @@ class AdminPanel {
     const stored = localStorage.getItem('homepageContent');
     const content = stored ? JSON.parse(stored) : defaults;
 
-    document.getElementById('heroTitle').value = content.heroTitle;
-    document.getElementById('heroDescription').value = content.heroDescription;
-    document.getElementById('ctaButtonText').value = content.ctaButtonText;
-    document.getElementById('ctaButtonLink').value = content.ctaButtonLink;
+    document.getElementById('heroTitle').value = content.heroTitle || defaults.heroTitle;
+    document.getElementById('heroDescription').value = content.heroDescription || defaults.heroDescription;
+    document.getElementById('ctaButtonText').value = content.ctaButtonText || defaults.ctaButtonText;
+    document.getElementById('ctaButtonLink').value = content.ctaButtonLink || defaults.ctaButtonLink;
   }
 
   handleHomepageSubmit(e) {
@@ -217,26 +313,20 @@ class AdminPanel {
       lastUpdated: new Date().toISOString()
     };
 
-    // Validation
     if (!content.heroTitle || !content.heroDescription || !content.ctaButtonText || !content.ctaButtonLink) {
-      this.showNotification('All fields are required!', 'error');
-      return;
-    }
-
-    if (!content.ctaButtonLink.match(/\.(html|htm)$/)) {
-      this.showNotification('CTA link must be an HTML file (e.g., color.html)', 'error');
+      Toast.error('All fields are required');
       return;
     }
 
     localStorage.setItem('homepageContent', JSON.stringify(content));
-    this.showNotification('Homepage content saved successfully! Refresh the homepage to see changes.');
+    Toast.success('Homepage content saved! Refresh homepage to see changes.');
   }
 
   handleHomepageReset(e) {
     e.preventDefault();
     localStorage.removeItem('homepageContent');
     this.loadHomepageContent();
-    this.showNotification('Homepage content reset to defaults.');
+    Toast.info('Homepage content reset to defaults');
   }
 
   // ==================== ABOUT EDITOR ====================
@@ -245,6 +335,11 @@ class AdminPanel {
     const form = document.getElementById('aboutForm');
     if (form) {
       form.addEventListener('submit', (e) => this.handleAboutSubmit(e));
+      document.getElementById('aboutResetBtn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        form.reset();
+        Toast.info('Form cleared');
+      });
       this.loadAboutContent();
     }
   }
@@ -272,10 +367,10 @@ class AdminPanel {
     };
 
     localStorage.setItem('aboutContent', JSON.stringify(content));
-    this.showNotification('About content saved successfully!');
+    Toast.success('About content saved!');
   }
 
-  // ==================== ADVANCED ARTICLE EDITOR ====================
+  // ==================== ARTICLE EDITOR ====================
 
   setupArticleEditor() {
     const form = document.getElementById('articleForm');
@@ -288,16 +383,9 @@ class AdminPanel {
       }
     }
 
-    // Setup markdown toolbar
     this.setupMarkdownToolbar();
-
-    // Setup live preview
     this.setupLivePreview();
-
-    // Setup featured image selector
     this.setupFeaturedImageSelector();
-
-    // Load articles list
     this.loadArticlesList();
   }
 
@@ -352,7 +440,7 @@ class AdminPanel {
         newCursorPos = start + 2;
         break;
       case 'code':
-        result = before + `` + `${selectedText || 'code'}` + `` + after;
+        result = before + `\`${selectedText || 'code'}\`` + after;
         break;
       case 'ul':
         const lines = selectedText.split('\n');
@@ -379,8 +467,8 @@ class AdminPanel {
   }
 
   updateLivePreview() {
-    const title = document.getElementById('articleTitle').value;
-    const body = document.getElementById('articleBody').value;
+    const title = document.getElementById('articleTitle')?.value || '';
+    const body = document.getElementById('articleBody')?.value || '';
     const preview = document.getElementById('articlePreview');
 
     if (!preview) return;
@@ -399,15 +487,13 @@ class AdminPanel {
     }
 
     preview.innerHTML = html;
-
-    // Update word count and reading time
     this.updateEditorStats();
   }
 
   updateEditorStats() {
-    const body = document.getElementById('articleBody').value;
+    const body = document.getElementById('articleBody')?.value || '';
     const wordCount = body.trim().split(/\s+/).filter(w => w).length;
-    const readingTime = Math.ceil(wordCount / 200); // 200 words per minute
+    const readingTime = Math.ceil(wordCount / 200);
 
     const wordCountEl = document.getElementById('wordCount');
     const readingTimeEl = document.getElementById('readingTime');
@@ -422,29 +508,28 @@ class AdminPanel {
     const clearBtn = document.getElementById('clearImageBtn');
     const imageInput = document.getElementById('articleImageUpload');
     const modal = document.getElementById('imageLibraryModal');
-    const modalClose = modal ? modal.querySelector('.modal-close') : null;
+    const modalClose = modal?.querySelector('.modal-close');
+    const modalOverlay = modal?.querySelector('.modal-overlay');
 
     if (openBtn) {
       openBtn.addEventListener('click', (e) => {
         e.preventDefault();
         this.loadImageLibrary();
-        if (modal) modal.classList.add('active');
+        modal?.classList.add('active');
       });
     }
 
     if (uploadBtn) {
       uploadBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        if (imageInput) imageInput.click();
+        imageInput?.click();
       });
     }
 
     if (imageInput) {
       imageInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
-        if (file) {
-          this.handleImageUpload(file);
-        }
+        if (file) this.handleArticleImageUpload(file);
       });
     }
 
@@ -456,17 +541,11 @@ class AdminPanel {
     }
 
     if (modalClose) {
-      modalClose.addEventListener('click', () => {
-        if (modal) modal.classList.remove('active');
-      });
+      modalClose.addEventListener('click', () => modal?.classList.remove('active'));
     }
 
-    if (modal) {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.classList.remove('active');
-        }
-      });
+    if (modalOverlay) {
+      modalOverlay.addEventListener('click', () => modal?.classList.remove('active'));
     }
   }
 
@@ -476,140 +555,119 @@ class AdminPanel {
 
     grid.innerHTML = '<p class="loading">Loading images...</p>';
 
+    let allImages = [];
+
+    // Load from localStorage galleries
+    const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
+    Object.entries(galleries).forEach(([collName, images]) => {
+      images.forEach(img => {
+        allImages.push({
+          name: img.name,
+          collection: collName,
+          url: img.data,
+          isLocal: true
+        });
+      });
+    });
+
+    // Try to load from GitHub
     try {
       const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images');
       const folders = await response.json();
 
-      if (!Array.isArray(folders)) {
-        grid.innerHTML = '<p class="loading">No images found</p>';
-        return;
-      }
-
-      let allImages = [];
-
-      for (const folder of folders) {
-        if (folder.type === 'dir' && folder.name !== 'homepage') {
-          try {
-            const collResponse = await fetch(folder.url);
-            const files = await collResponse.json();
-            if (Array.isArray(files)) {
-              const images = files.filter(f => this.isImageFile(f.name));
-              allImages = allImages.concat(images.map(img => ({
-                name: img.name,
-                collection: folder.name,
-                url: `images/${folder.name}/${img.name}`
-              })));
-            }
-          } catch (e) {
-            console.error('Error loading folder:', folder.name);
+      if (Array.isArray(folders)) {
+        for (const folder of folders) {
+          if (folder.type === 'dir' && folder.name !== 'homepage' && folder.name !== 'videos') {
+            try {
+              const collResponse = await fetch(folder.url);
+              const files = await collResponse.json();
+              if (Array.isArray(files)) {
+                const images = files.filter(f => this.isImageFile(f.name));
+                allImages = allImages.concat(images.map(img => ({
+                  name: img.name,
+                  collection: folder.name,
+                  url: `images/${folder.name}/${img.name}`,
+                  isLocal: false
+                })));
+              }
+            } catch (e) { /* ignore */ }
           }
         }
       }
-
-      if (allImages.length === 0) {
-        grid.innerHTML = '<p class="loading">No images available</p>';
-        return;
-      }
-
-      grid.innerHTML = allImages.map(img => `
-        <div class="image-library-item" data-url="${img.url}" data-name="${img.name}">
-          <img src="${img.url}" alt="${img.name}" loading="lazy">
-        </div>
-      `).join('');
-
-      grid.querySelectorAll('.image-library-item').forEach(item => {
-        item.addEventListener('click', () => this.selectFeaturedImage(item));
-      });
-    } catch (error) {
-      console.error('Error loading image library:', error);
-      grid.innerHTML = '<p class="loading">Error loading images</p>';
+    } catch (e) {
+      console.log('GitHub API unavailable');
     }
+
+    if (allImages.length === 0) {
+      grid.innerHTML = '<p class="loading">No images available. Upload images to a collection first.</p>';
+      return;
+    }
+
+    grid.innerHTML = allImages.map(img => `
+      <div class="image-library-item" data-url="${img.url}" data-name="${img.name}">
+        <img src="${img.url}" alt="${this.escapeHtml(img.name)}" loading="lazy">
+      </div>
+    `).join('');
+
+    grid.querySelectorAll('.image-library-item').forEach(item => {
+      item.addEventListener('click', () => this.selectFeaturedImage(item));
+    });
   }
 
   selectFeaturedImage(element) {
     const url = element.dataset.url;
     const name = element.dataset.name;
 
-    // Remove previous selection
     document.querySelectorAll('.image-library-item').forEach(item => {
       item.classList.remove('selected');
     });
-
-    // Select this item
     element.classList.add('selected');
 
-    // Update featured image preview
     const preview = document.getElementById('featuredImagePreview');
     if (preview) {
-      preview.innerHTML = `<img src="${url}" alt="${name}">`;
+      preview.innerHTML = `<img src="${url}" alt="${this.escapeHtml(name)}">`;
     }
 
-    // Store in hidden input
     const input = document.getElementById('articleThumbnail');
-    if (input) {
-      input.value = url;
-    }
+    if (input) input.value = url;
 
-    // Show clear button
     const clearBtn = document.getElementById('clearImageBtn');
-    if (clearBtn) {
-      clearBtn.style.display = 'block';
-    }
+    if (clearBtn) clearBtn.style.display = 'block';
 
-    // Close modal
-    const modal = document.getElementById('imageLibraryModal');
-    if (modal) {
-      modal.classList.remove('active');
-    }
+    document.getElementById('imageLibraryModal')?.classList.remove('active');
+    Toast.success('Image selected');
   }
 
-  handleImageUpload(file) {
+  handleArticleImageUpload(file) {
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = e.target.result;
-      const imageName = `article-img-${Date.now()}.${file.name.split('.').pop()}`;
 
-      // Store in localStorage (base64)
-      let storedImages = JSON.parse(localStorage.getItem('uploadedImages') || '{}');
-      storedImages[imageName] = data;
-      localStorage.setItem('uploadedImages', JSON.stringify(storedImages));
-
-      // Set as featured image
       const preview = document.getElementById('featuredImagePreview');
       if (preview) {
-        preview.innerHTML = `<img src="${data}" alt="${imageName}">`;
+        preview.innerHTML = `<img src="${data}" alt="${file.name}">`;
       }
 
       const input = document.getElementById('articleThumbnail');
-      if (input) {
-        input.value = data;
-      }
+      if (input) input.value = data;
 
       const clearBtn = document.getElementById('clearImageBtn');
-      if (clearBtn) {
-        clearBtn.style.display = 'block';
-      }
+      if (clearBtn) clearBtn.style.display = 'block';
 
-      this.showNotification('Image uploaded successfully!');
+      Toast.success('Image uploaded');
     };
     reader.readAsDataURL(file);
   }
 
   clearFeaturedImage() {
     const preview = document.getElementById('featuredImagePreview');
-    if (preview) {
-      preview.innerHTML = '<p>No image selected</p>';
-    }
+    if (preview) preview.innerHTML = '<p>No image selected</p>';
 
     const input = document.getElementById('articleThumbnail');
-    if (input) {
-      input.value = '';
-    }
+    if (input) input.value = '';
 
     const clearBtn = document.getElementById('clearImageBtn');
-    if (clearBtn) {
-      clearBtn.style.display = 'none';
-    }
+    if (clearBtn) clearBtn.style.display = 'none';
   }
 
   handleArticleSubmit(e) {
@@ -626,11 +684,10 @@ class AdminPanel {
     const thumbnail = document.getElementById('articleThumbnail').value.trim();
 
     if (!title || !author || !body) {
-      this.showNotification('Please fill in title, author, and content', 'error');
+      Toast.error('Please fill in title, author, and content');
       return;
     }
 
-    // Auto-generate excerpt if not provided
     const finalExcerpt = excerpt || body.substring(0, 150).replace(/[#*\[\]`]/g, '').trim() + '...';
 
     const article = {
@@ -641,7 +698,7 @@ class AdminPanel {
       excerpt: finalExcerpt,
       body,
       thumbnail,
-      date: editingId ? this.getArticleById(editingId).date : new Date().toISOString(),
+      date: editingId ? (this.getArticleById(editingId)?.date || new Date().toISOString()) : new Date().toISOString(),
       published: document.getElementById('articlePublished').checked
     };
 
@@ -649,11 +706,11 @@ class AdminPanel {
 
     if (editingId) {
       articles = articles.map(a => a.id === editingId ? article : a);
-      this.showNotification('Article updated successfully!');
+      Toast.success('Article updated!');
       this.cancelArticleEdit();
     } else {
       articles.push(article);
-      this.showNotification('Article created successfully!');
+      Toast.success('Article created!');
     }
 
     localStorage.setItem('articles', JSON.stringify(articles));
@@ -674,7 +731,13 @@ class AdminPanel {
     const articles = JSON.parse(localStorage.getItem('articles') || '[]');
 
     if (articles.length === 0) {
-      articlesList.innerHTML = '<p class="loading">No articles yet. Create your first article!</p>';
+      articlesList.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">📝</div>
+          <p class="empty-state-title">No articles yet</p>
+          <p class="empty-state-text">Create your first article using the form above</p>
+        </div>
+      `;
       return;
     }
 
@@ -688,6 +751,7 @@ class AdminPanel {
               <span>${this.formatDate(article.date)}</span>
               <span>By ${this.escapeHtml(article.author)}</span>
               ${article.category ? `<span>${this.escapeHtml(article.category)}</span>` : ''}
+              <span class="badge ${article.published ? 'badge-success' : 'badge-warning'}">${article.published ? 'Published' : 'Draft'}</span>
             </div>
           </div>
           <div class="article-item-actions">
@@ -697,7 +761,6 @@ class AdminPanel {
         </div>
       `).join('');
 
-    // Add event listeners
     document.querySelectorAll('.article-btn-edit').forEach(btn => {
       btn.addEventListener('click', () => this.editArticle(btn.dataset.id));
     });
@@ -722,39 +785,26 @@ class AdminPanel {
     document.getElementById('articleBody').value = article.body;
     document.getElementById('articlePublished').checked = article.published !== false;
 
-    // Set featured image
     if (article.thumbnail) {
       const preview = document.getElementById('featuredImagePreview');
-      if (preview) {
-        preview.innerHTML = `<img src="${article.thumbnail}" alt="featured">`;
-      }
+      if (preview) preview.innerHTML = `<img src="${article.thumbnail}" alt="featured">`;
 
       const input = document.getElementById('articleThumbnail');
-      if (input) {
-        input.value = article.thumbnail;
-      }
+      if (input) input.value = article.thumbnail;
 
       const clearBtn = document.getElementById('clearImageBtn');
-      if (clearBtn) {
-        clearBtn.style.display = 'block';
-      }
+      if (clearBtn) clearBtn.style.display = 'block';
     }
 
     const form = document.getElementById('articleForm');
     form.dataset.editingId = id;
-    const editorTitle = document.getElementById('editorTitle');
-    const submitBtn = document.getElementById('submitBtn');
-    const cancelEditBtn = document.getElementById('cancelEditBtn');
 
-    if (editorTitle) editorTitle.textContent = 'Edit Article';
-    if (submitBtn) submitBtn.textContent = 'Update Article';
-    if (cancelEditBtn) cancelEditBtn.style.display = 'block';
+    document.getElementById('editorTitle').textContent = 'Edit Article';
+    document.getElementById('submitBtn').textContent = 'Update Article';
+    document.getElementById('cancelEditBtn').style.display = 'block';
 
     this.updateLivePreview();
-    const editorLeft = document.querySelector('.article-editor-left');
-    if (editorLeft) {
-      editorLeft.scrollIntoView({ behavior: 'smooth' });
-    }
+    document.querySelector('.article-editor-left')?.scrollIntoView({ behavior: 'smooth' });
   }
 
   deleteArticle(id) {
@@ -763,7 +813,7 @@ class AdminPanel {
     localStorage.setItem('articles', JSON.stringify(articles));
     this.loadArticlesList();
     this.loadStats();
-    this.showNotification('Article deleted successfully!');
+    Toast.success('Article deleted');
   }
 
   cancelArticleEdit() {
@@ -771,13 +821,9 @@ class AdminPanel {
     form.reset();
     delete form.dataset.editingId;
 
-    const editorTitle = document.getElementById('editorTitle');
-    const submitBtn = document.getElementById('submitBtn');
-    const cancelEditBtn = document.getElementById('cancelEditBtn');
-
-    if (editorTitle) editorTitle.textContent = 'Create New Article';
-    if (submitBtn) submitBtn.textContent = 'Create Article';
-    if (cancelEditBtn) cancelEditBtn.style.display = 'none';
+    document.getElementById('editorTitle').textContent = 'Create New Article';
+    document.getElementById('submitBtn').textContent = 'Create Article';
+    document.getElementById('cancelEditBtn').style.display = 'none';
 
     const preview = document.getElementById('articlePreview');
     if (preview) {
@@ -795,93 +841,114 @@ class AdminPanel {
   // ==================== GALLERY MANAGEMENT ====================
 
   setupGalleryManagement() {
-    // Load actual images from GitHub
-    this.loadRealGalleryImages();
-  }
+    // Collection buttons
+    const newCollectionBtn = document.getElementById('newCollectionBtn');
+    const createCollectionBtn = document.getElementById('createCollectionBtn');
+    const cancelCollectionBtn = document.getElementById('cancelCollectionBtn');
+    const renameCollectionBtn = document.getElementById('renameCollectionBtn');
+    const deleteCollectionBtn = document.getElementById('deleteCollectionBtn');
+    const confirmRenameBtn = document.getElementById('confirmRenameBtn');
+    const cancelRenameBtn = document.getElementById('cancelRenameBtn');
 
-  async loadRealGalleryImages() {
-    const grid = document.getElementById('collectionImagesGrid');
-    if (!grid) return;
+    // Image controls
+    const sortGallery = document.getElementById('sortGallery');
+    const selectAllImages = document.getElementById('selectAllImages');
+    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
 
-    grid.innerHTML = '<p class="loading">Loading gallery images...</p>';
+    // Upload
+    const galleryUploadArea = document.getElementById('galleryUploadArea');
+    const galleryInput = document.getElementById('galleryInput');
 
-    try {
-      const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images');
-      const folders = await response.json();
-
-      if (!Array.isArray(folders)) {
-        grid.innerHTML = '<p class="loading">No collections found.</p>';
-        return;
-      }
-
-      const collections = folders.filter(f => f.type === 'dir' && f.name !== 'homepage');
-
-      if (collections.length === 0) {
-        grid.innerHTML = '<p class="loading">No collections. Create folders in images/</p>';
-        return;
-      }
-
-      let allImages = [];
-
-      // Load images from all collections
-      for (const collection of collections) {
-        try {
-          const collResponse = await fetch(collection.url);
-          const files = await collResponse.json();
-          if (Array.isArray(files)) {
-            const images = files.filter(f => this.isImageFile(f.name));
-            allImages = allImages.concat(images.map(img => ({
-              name: img.name,
-              collection: collection.name,
-              size: img.size,
-              url: `images/${collection.name}/${img.name}`
-            })));
-          }
-        } catch (e) {
-          console.error('Error loading collection:', collection.name);
-        }
-      }
-
-      if (allImages.length === 0) {
-        grid.innerHTML = '<p class="loading">No images in any collection.</p>';
-        return;
-      }
-
-      // Render with thumbnails
-      grid.innerHTML = allImages.map(file => `
-        <div class="gallery-image-item">
-          <img src="${file.url}" alt="${this.escapeHtml(file.name)}" loading="lazy">
-          <div class="gallery-image-info">
-            <div class="gallery-image-name" title="${this.escapeHtml(file.name)}">${this.escapeHtml(file.name)}</div>
-            <div class="gallery-image-meta">
-              <span class="gallery-image-collection">${this.escapeHtml(file.collection)}</span>
-              <span class="gallery-image-size">${this.formatFileSize(file.size)}</span>
-            </div>
-          </div>
-        </div>
-      `).join('');
-
-      // Add click handlers to view in lightbox
-      document.querySelectorAll('.gallery-image-item').forEach((item, index) => {
-        item.addEventListener('click', () => {
-          const allUrls = allImages.map(img => img.url);
-          if (window.AdvancedLightbox) {
-            window.AdvancedLightbox.open(allImages[index].url, allUrls);
-          }
-        });
-      });
-
-    } catch (error) {
-      console.error('Error loading gallery:', error);
-      grid.innerHTML = '<p class="loading">Error loading gallery.</p>';
+    // Event listeners
+    if (newCollectionBtn) {
+      newCollectionBtn.addEventListener('click', () => this.showNewCollectionForm());
     }
+
+    if (createCollectionBtn) {
+      createCollectionBtn.addEventListener('click', () => this.createCollection());
+    }
+
+    if (cancelCollectionBtn) {
+      cancelCollectionBtn.addEventListener('click', () => this.hideNewCollectionForm());
+    }
+
+    if (renameCollectionBtn) {
+      renameCollectionBtn.addEventListener('click', () => this.showRenameForm());
+    }
+
+    if (deleteCollectionBtn) {
+      deleteCollectionBtn.addEventListener('click', () => this.deleteCurrentCollection());
+    }
+
+    if (confirmRenameBtn) {
+      confirmRenameBtn.addEventListener('click', () => this.confirmRenameCollection());
+    }
+
+    if (cancelRenameBtn) {
+      cancelRenameBtn.addEventListener('click', () => this.hideRenameForm());
+    }
+
+    if (sortGallery) {
+      sortGallery.addEventListener('change', () => this.renderCurrentCollectionImages());
+    }
+
+    if (selectAllImages) {
+      selectAllImages.addEventListener('change', (e) => this.toggleSelectAllImages(e.target.checked));
+    }
+
+    if (deleteSelectedBtn) {
+      deleteSelectedBtn.addEventListener('click', () => this.deleteSelectedImages());
+    }
+
+    // Upload handling
+    if (galleryUploadArea) {
+      galleryUploadArea.addEventListener('click', () => galleryInput?.click());
+      galleryUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        galleryUploadArea.classList.add('drag-over');
+      });
+      galleryUploadArea.addEventListener('dragleave', () => {
+        galleryUploadArea.classList.remove('drag-over');
+      });
+      galleryUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        galleryUploadArea.classList.remove('drag-over');
+        this.handleGalleryUpload(e.dataTransfer.files);
+      });
+    }
+
+    if (galleryInput) {
+      galleryInput.addEventListener('change', (e) => {
+        this.handleGalleryUpload(e.target.files);
+        e.target.value = '';
+      });
+    }
+
+    // Enter key for collection name input
+    document.getElementById('collectionNameInput')?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') this.createCollection();
+    });
+
+    document.getElementById('renameInput')?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') this.confirmRenameCollection();
+    });
+
+    // Initialize galleries if needed
+    if (!localStorage.getItem('galleries')) {
+      this.initializeSampleGalleries();
+    }
+
+    this.loadGalleryCollections();
   }
 
-  loadGalleries() {
+  loadGalleryCollections() {
     const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
-    this.currentCollection = null;
-    this.currentSortMethod = 'name';
     this.renderCollectionsList(galleries);
+
+    // Reset view
+    document.getElementById('noCollectionSelected').style.display = 'flex';
+    document.getElementById('collectionDetail').style.display = 'none';
+    this.currentCollection = null;
   }
 
   renderCollectionsList(galleries) {
@@ -889,12 +956,16 @@ class AdminPanel {
     const collectionNames = Object.keys(galleries).sort();
 
     if (collectionNames.length === 0) {
-      collectionsList.innerHTML = '<p class="loading">No collections yet. Create one to get started!</p>';
+      collectionsList.innerHTML = `
+        <div class="empty-state" style="padding: var(--space-xl) var(--space-sm);">
+          <p class="empty-state-text" style="max-width: 200px;">No collections yet. Click "+ New" to create one.</p>
+        </div>
+      `;
       return;
     }
 
     collectionsList.innerHTML = collectionNames.map(name => `
-      <div class="collection-item" data-collection="${name}">
+      <div class="collection-item ${this.currentCollection === name ? 'active' : ''}" data-collection="${name}">
         <span class="collection-item-name">${this.escapeHtml(name)}</span>
         <span class="collection-item-count">${galleries[name].length}</span>
       </div>
@@ -913,7 +984,7 @@ class AdminPanel {
     if (!galleries[name]) return;
 
     this.currentCollection = name;
-    this.currentSortMethod = 'name';
+    this.selectedImages.clear();
 
     // Update active state
     document.querySelectorAll('.collection-item').forEach(item => {
@@ -921,42 +992,33 @@ class AdminPanel {
     });
 
     // Show collection detail
-    const noCollection = document.getElementById('noCollectionSelected');
-    const collectionDetail = document.getElementById('collectionDetail');
-    if (noCollection) noCollection.style.display = 'none';
-    if (collectionDetail) collectionDetail.style.display = 'block';
+    document.getElementById('noCollectionSelected').style.display = 'none';
+    document.getElementById('collectionDetail').style.display = 'block';
 
     // Update header
-    const collectionName = document.getElementById('selectedCollectionName');
-    const imageCount = document.getElementById('collectionImageCount');
-    if (collectionName) collectionName.textContent = name;
-    if (imageCount) imageCount.textContent = `${galleries[name].length} images`;
+    document.getElementById('selectedCollectionName').textContent = name;
+    document.getElementById('collectionImageCount').textContent = `${galleries[name].length} images`;
 
     // Reset form
-    const renameForm = document.getElementById('renameForm');
-    if (renameForm) renameForm.style.display = 'none';
+    document.getElementById('renameForm').style.display = 'none';
+    document.getElementById('sortGallery').value = 'name';
+    document.getElementById('selectAllImages').checked = false;
+    document.getElementById('deleteSelectedBtn').style.display = 'none';
 
-    const sortGallery = document.getElementById('sortGallery');
-    if (sortGallery) sortGallery.value = 'name';
-
-    // Render images
     this.renderCurrentCollectionImages();
   }
 
   showNewCollectionForm() {
     const form = document.getElementById('newCollectionForm');
     const input = document.getElementById('collectionNameInput');
-    if (form) {
-      form.style.display = 'block';
-      if (input) input.focus();
-    }
+    form.style.display = 'block';
+    input.value = '';
+    input.focus();
   }
 
   hideNewCollectionForm() {
-    const form = document.getElementById('newCollectionForm');
-    const input = document.getElementById('collectionNameInput');
-    if (form) form.style.display = 'none';
-    if (input) input.value = '';
+    document.getElementById('newCollectionForm').style.display = 'none';
+    document.getElementById('collectionNameInput').value = '';
   }
 
   createCollection() {
@@ -964,41 +1026,37 @@ class AdminPanel {
     const name = input?.value.trim();
 
     if (!name) {
-      this.showNotification('Please enter a collection name', 'error');
+      Toast.error('Please enter a collection name');
       return;
     }
 
     const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
 
     if (galleries[name]) {
-      this.showNotification('Collection already exists', 'error');
+      Toast.error('Collection already exists');
       return;
     }
 
     galleries[name] = [];
     localStorage.setItem('galleries', JSON.stringify(galleries));
-    this.showNotification('Collection created!');
+    Toast.success(`Collection "${name}" created`);
     this.hideNewCollectionForm();
-    this.loadGalleries();
+    this.renderCollectionsList(galleries);
     this.selectCollection(name);
+    this.loadStats();
   }
 
   showRenameForm() {
     const form = document.getElementById('renameForm');
     const input = document.getElementById('renameInput');
-    if (form) {
-      form.style.display = 'block';
-      if (input) {
-        input.value = this.currentCollection;
-        input.focus();
-        input.select();
-      }
-    }
+    form.style.display = 'block';
+    input.value = this.currentCollection;
+    input.focus();
+    input.select();
   }
 
   hideRenameForm() {
-    const form = document.getElementById('renameForm');
-    if (form) form.style.display = 'none';
+    document.getElementById('renameForm').style.display = 'none';
   }
 
   confirmRenameCollection() {
@@ -1013,7 +1071,7 @@ class AdminPanel {
     const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
 
     if (galleries[newName]) {
-      this.showNotification('Collection name already exists', 'error');
+      Toast.error('Collection name already exists');
       return;
     }
 
@@ -1021,9 +1079,10 @@ class AdminPanel {
     delete galleries[this.currentCollection];
     localStorage.setItem('galleries', JSON.stringify(galleries));
 
-    this.showNotification('Collection renamed!');
+    Toast.success('Collection renamed');
     this.hideRenameForm();
-    this.loadGalleries();
+    this.currentCollection = newName;
+    this.renderCollectionsList(galleries);
     this.selectCollection(newName);
   }
 
@@ -1038,26 +1097,25 @@ class AdminPanel {
     delete galleries[this.currentCollection];
     localStorage.setItem('galleries', JSON.stringify(galleries));
 
-    this.showNotification('Collection deleted!');
+    Toast.success('Collection deleted');
     this.currentCollection = null;
-    this.loadGalleries();
+    this.renderCollectionsList(galleries);
 
-    const noCollection = document.getElementById('noCollectionSelected');
-    const collectionDetail = document.getElementById('collectionDetail');
-    if (noCollection) noCollection.style.display = 'flex';
-    if (collectionDetail) collectionDetail.style.display = 'none';
+    document.getElementById('noCollectionSelected').style.display = 'flex';
+    document.getElementById('collectionDetail').style.display = 'none';
+    this.loadStats();
   }
 
   handleGalleryUpload(files) {
     if (!this.currentCollection) {
-      this.showNotification('Please select a collection first', 'error');
+      Toast.error('Please select a collection first');
       return;
     }
 
     const imageFiles = Array.from(files).filter(f => this.isImageFile(f.name));
 
     if (imageFiles.length === 0) {
-      this.showNotification('No image files selected', 'error');
+      Toast.error('No valid image files selected');
       return;
     }
 
@@ -1066,18 +1124,20 @@ class AdminPanel {
     imageFiles.forEach(file => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        this.uploadImageToCollection(file.name, e.target.result);
+        this.uploadImageToCollection(file.name, e.target.result, file.size);
         loaded++;
         if (loaded === imageFiles.length) {
-          this.showNotification(`Uploaded ${imageFiles.length} image(s)`);
+          Toast.success(`Uploaded ${imageFiles.length} image(s)`);
           this.renderCurrentCollectionImages();
+          this.updateCollectionCount();
+          this.loadStats();
         }
       };
       reader.readAsDataURL(file);
     });
   }
 
-  uploadImageToCollection(filename, imageData) {
+  uploadImageToCollection(filename, imageData, size) {
     const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
 
     if (!galleries[this.currentCollection]) {
@@ -1088,11 +1148,18 @@ class AdminPanel {
       id: Date.now() + Math.random(),
       name: filename,
       data: imageData,
-      size: Math.round(imageData.length),
+      size: size || imageData.length,
       dateAdded: new Date().toISOString()
     });
 
     localStorage.setItem('galleries', JSON.stringify(galleries));
+  }
+
+  updateCollectionCount() {
+    const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
+    const count = galleries[this.currentCollection]?.length || 0;
+    document.getElementById('collectionImageCount').textContent = `${count} images`;
+    this.renderCollectionsList(galleries);
   }
 
   renderCurrentCollectionImages() {
@@ -1126,202 +1193,177 @@ class AdminPanel {
     if (!grid) return;
 
     if (images.length === 0) {
-      grid.innerHTML = '<p class="loading" style="grid-column: 1/-1;">No images yet. Upload some to get started!</p>';
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column: 1/-1;">
+          <div class="empty-state-icon">🖼️</div>
+          <p class="empty-state-title">No images yet</p>
+          <p class="empty-state-text">Drag & drop images or click the upload area above</p>
+        </div>
+      `;
       return;
     }
 
     grid.innerHTML = sortedImages.map(image => `
-      <div class="gallery-image-item" data-image-id="${image.id}">
-        <img src="${image.data}" alt="${image.name}">
-        <input type="checkbox" class="gallery-image-checkbox" data-image-id="${image.id}">
+      <div class="gallery-image-item ${this.selectedImages.has(image.id) ? 'selected' : ''}" data-image-id="${image.id}">
+        <img src="${image.data}" alt="${this.escapeHtml(image.name)}" loading="lazy">
+        <input type="checkbox" class="gallery-image-checkbox" data-image-id="${image.id}" ${this.selectedImages.has(image.id) ? 'checked' : ''}>
         <div class="gallery-image-info">
-          <div class="gallery-image-name">${this.escapeHtml(image.name)}</div>
-          <div style="font-size: 10px; margin-top: 4px;">${this.formatFileSize(image.size)}</div>
+          <div class="gallery-image-name" title="${this.escapeHtml(image.name)}">${this.escapeHtml(image.name)}</div>
+          <div class="gallery-image-meta">
+            <span class="gallery-image-size">${this.formatFileSize(image.size)}</span>
+          </div>
         </div>
       </div>
     `).join('');
 
     document.querySelectorAll('.gallery-image-checkbox').forEach(checkbox => {
-      checkbox.addEventListener('change', () => this.updateDeleteSelectedButton());
+      checkbox.addEventListener('change', (e) => {
+        e.stopPropagation();
+        const id = parseFloat(checkbox.dataset.imageId);
+        if (checkbox.checked) {
+          this.selectedImages.add(id);
+        } else {
+          this.selectedImages.delete(id);
+        }
+        checkbox.closest('.gallery-image-item').classList.toggle('selected', checkbox.checked);
+        this.updateDeleteSelectedButton();
+      });
     });
 
     document.querySelectorAll('.gallery-image-item').forEach(item => {
       item.addEventListener('click', (e) => {
-        if (!e.target.classList.contains('gallery-image-checkbox')) {
-          const checkbox = item.querySelector('.gallery-image-checkbox');
-          checkbox.checked = !checkbox.checked;
-          this.updateDeleteSelectedButton();
-        }
+        if (e.target.classList.contains('gallery-image-checkbox')) return;
+        const checkbox = item.querySelector('.gallery-image-checkbox');
+        checkbox.checked = !checkbox.checked;
+        checkbox.dispatchEvent(new Event('change'));
       });
     });
   }
 
+  toggleSelectAllImages(checked) {
+    const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
+    const images = galleries[this.currentCollection] || [];
+
+    this.selectedImages.clear();
+    if (checked) {
+      images.forEach(img => this.selectedImages.add(img.id));
+    }
+
+    document.querySelectorAll('.gallery-image-checkbox').forEach(checkbox => {
+      checkbox.checked = checked;
+      checkbox.closest('.gallery-image-item').classList.toggle('selected', checked);
+    });
+
+    this.updateDeleteSelectedButton();
+  }
+
   updateDeleteSelectedButton() {
-    const selectedCount = document.querySelectorAll('.gallery-image-checkbox:checked').length;
+    const count = this.selectedImages.size;
     const deleteBtn = document.getElementById('deleteSelectedBtn');
     if (deleteBtn) {
-      deleteBtn.style.display = selectedCount > 0 ? 'block' : 'none';
-      deleteBtn.textContent = `Delete Selected (${selectedCount})`;
+      deleteBtn.style.display = count > 0 ? 'inline-flex' : 'none';
+      deleteBtn.textContent = `Delete Selected (${count})`;
+    }
+
+    // Update select all checkbox
+    const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
+    const totalImages = galleries[this.currentCollection]?.length || 0;
+    const selectAll = document.getElementById('selectAllImages');
+    if (selectAll && totalImages > 0) {
+      selectAll.checked = count === totalImages;
+      selectAll.indeterminate = count > 0 && count < totalImages;
     }
   }
 
   deleteSelectedImages() {
-    const selectedIds = Array.from(document.querySelectorAll('.gallery-image-checkbox:checked'))
-      .map(cb => cb.dataset.imageId);
+    const count = this.selectedImages.size;
+    if (count === 0) return;
 
-    if (selectedIds.length === 0) return;
-
-    if (!confirm(`Delete ${selectedIds.length} image(s)? This cannot be undone.`)) {
+    if (!confirm(`Delete ${count} image(s)? This cannot be undone.`)) {
       return;
     }
 
     const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
     galleries[this.currentCollection] = galleries[this.currentCollection].filter(
-      img => !selectedIds.includes(img.id.toString())
+      img => !this.selectedImages.has(img.id)
     );
 
     localStorage.setItem('galleries', JSON.stringify(galleries));
-    this.showNotification(`Deleted ${selectedIds.length} image(s)`);
+    Toast.success(`Deleted ${count} image(s)`);
+
+    this.selectedImages.clear();
+    document.getElementById('selectAllImages').checked = false;
     this.renderCurrentCollectionImages();
-
-    const selectAll = document.getElementById('selectAllImages');
-    if (selectAll) selectAll.checked = false;
-  }
-
-  deleteImage(imageId) {
-    if (!confirm('Delete this image? This cannot be undone.')) {
-      return;
-    }
-
-    const galleries = JSON.parse(localStorage.getItem('galleries') || '{}');
-    galleries[this.currentCollection] = galleries[this.currentCollection].filter(
-      img => img.id !== imageId
-    );
-
-    localStorage.setItem('galleries', JSON.stringify(galleries));
-    this.showNotification('Image deleted');
-    this.renderCurrentCollectionImages();
+    this.updateCollectionCount();
+    this.updateDeleteSelectedButton();
+    this.loadStats();
   }
 
   initializeSampleGalleries() {
-    // Create sample galleries with demo images
     const sampleGalleries = {
-      'Vilnius': [
-        {
-          id: 1,
-          name: 'vilnius-cathedral.jpg',
-          data: this.generateSampleImage('#1a1a1a', 'Vilnius\nCathedral'),
-          size: 245000,
-          dateAdded: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          id: 2,
-          name: 'vilnius-street.jpg',
-          data: this.generateSampleImage('#2d2d2d', 'Street\nLife'),
-          size: 189000,
-          dateAdded: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          id: 3,
-          name: 'vilnius-sunset.jpg',
-          data: this.generateSampleImage('#4a4a4a', 'Golden\nHour'),
-          size: 312000,
-          dateAdded: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
-        }
-      ],
-      'Landscapes': [
-        {
-          id: 4,
-          name: 'mountain-peaks.jpg',
-          data: this.generateSampleImage('#3d5a3d', 'Mountain\nPeaks'),
-          size: 267000,
-          dateAdded: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          id: 5,
-          name: 'forest-dawn.jpg',
-          data: this.generateSampleImage('#1a3a1a', 'Forest\nDawn'),
-          size: 198000,
-          dateAdded: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          id: 6,
-          name: 'coastal-view.jpg',
-          data: this.generateSampleImage('#1a3a5a', 'Coastal\nView'),
-          size: 289000,
-          dateAdded: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
-        }
-      ],
-      'Portrait': [
-        {
-          id: 7,
-          name: 'studio-portrait.jpg',
-          data: this.generateSampleImage('#5a5a3d', 'Studio\nPortrait'),
-          size: 156000,
-          dateAdded: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          id: 8,
-          name: 'natural-light.jpg',
-          data: this.generateSampleImage('#5a4a2d', 'Natural\nLight'),
-          size: 203000,
-          dateAdded: new Date().toISOString()
-        }
-      ]
+      'Sample Collection': []
     };
-
     localStorage.setItem('galleries', JSON.stringify(sampleGalleries));
-  }
-
-  generateSampleImage(bgColor, text) {
-    const canvas = document.createElement('canvas');
-    canvas.width = 400;
-    canvas.height = 300;
-    const ctx = canvas.getContext('2d');
-
-    ctx.fillStyle = bgColor;
-    ctx.fillRect(0, 0, 400, 300);
-
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-    for (let i = 0; i < 5; i++) {
-      ctx.fillRect(Math.random() * 400, Math.random() * 300, Math.random() * 100, Math.random() * 100);
-    }
-
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.font = 'bold 24px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    const lines = text.split('\n');
-    const lineHeight = 30;
-    const startY = 150 - (lines.length * lineHeight) / 2;
-
-    lines.forEach((line, i) => {
-      ctx.fillText(line, 200, startY + i * lineHeight);
-    });
-
-    return canvas.toDataURL('image/jpeg', 0.9);
   }
 
   // ==================== VIDEO MANAGEMENT ====================
 
+  setupVideoManagement() {
+    const videoUploadArea = document.getElementById('videoUploadArea');
+    const videoInput = document.getElementById('videoInput');
+
+    if (videoUploadArea) {
+      videoUploadArea.addEventListener('click', () => videoInput?.click());
+      videoUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        videoUploadArea.classList.add('drag-over');
+      });
+      videoUploadArea.addEventListener('dragleave', () => {
+        videoUploadArea.classList.remove('drag-over');
+      });
+      videoUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        videoUploadArea.classList.remove('drag-over');
+        Toast.info('Videos must be uploaded to GitHub repository: images/videos/large/');
+      });
+    }
+
+    if (videoInput) {
+      videoInput.addEventListener('change', () => {
+        Toast.info('Videos must be uploaded to GitHub repository: images/videos/large/');
+      });
+    }
+  }
+
   async loadVideos() {
     const videoList = document.getElementById('videoList');
-    videoList.innerHTML = '<p class="loading">Loading videos...</p>';
+    videoList.innerHTML = '<div class="loading-overlay"><div class="spinner"></div></div>';
 
     try {
       const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images/videos/large');
       const files = await response.json();
 
       if (!Array.isArray(files)) {
-        videoList.innerHTML = '<p class="loading">No videos found.</p>';
+        videoList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🎬</div>
+            <p class="empty-state-title">No videos found</p>
+            <p class="empty-state-text">Upload videos to images/videos/large/ in your GitHub repository</p>
+          </div>
+        `;
         return;
       }
 
       const videoFiles = files.filter(f => this.isVideoFile(f.name));
 
       if (videoFiles.length === 0) {
-        videoList.innerHTML = '<p class="loading">No videos in library. Upload to images/videos/large/</p>';
+        videoList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🎬</div>
+            <p class="empty-state-title">No videos in library</p>
+            <p class="empty-state-text">Upload videos to images/videos/large/</p>
+          </div>
+        `;
         return;
       }
 
@@ -1331,7 +1373,7 @@ class AdminPanel {
             ▶
           </div>
           <div class="file-info">
-            <div class="file-name">${file.name}</div>
+            <div class="file-name">${this.escapeHtml(file.name)}</div>
             <div class="file-size">${this.formatFileSize(file.size)}</div>
             <div class="file-actions">
               <a href="images/videos/large/${file.name}" target="_blank" class="file-action-btn">Watch</a>
@@ -1341,121 +1383,120 @@ class AdminPanel {
       `).join('');
     } catch (error) {
       console.error('Error loading videos:', error);
-      videoList.innerHTML = '<p class="loading">Error loading videos.</p>';
-    }
-  }
-
-  // ==================== GALLERY MANAGEMENT ====================
-
-  async loadGallery() {
-    const galleryList = document.getElementById('galleryList');
-    galleryList.innerHTML = '<p class="loading">Loading gallery...</p>';
-
-    try {
-      const response = await fetch('https://api.github.com/repos/Mantexas/Light-UI/contents/images');
-      const folders = await response.json();
-
-      if (!Array.isArray(folders)) {
-        galleryList.innerHTML = '<p class="loading">No collections found.</p>';
-        return;
-      }
-
-      const collections = folders.filter(f => f.type === 'dir' && f.name !== 'homepage');
-
-      if (collections.length === 0) {
-        galleryList.innerHTML = '<p class="loading">No collections. Create folders in images/</p>';
-        return;
-      }
-
-      let allImages = [];
-
-      // Load images from all collections
-      for (const collection of collections) {
-        try {
-          const collResponse = await fetch(collection.url);
-          const files = await collResponse.json();
-          if (Array.isArray(files)) {
-            const images = files.filter(f => this.isImageFile(f.name));
-            allImages = allImages.concat(images.map(img => ({
-              name: img.name,
-              collection: collection.name,
-              size: img.size
-            })));
-          }
-        } catch (e) {
-          console.error('Error loading collection:', collection.name);
-        }
-      }
-
-      if (allImages.length === 0) {
-        galleryList.innerHTML = '<p class="loading">No images in any collection.</p>';
-        return;
-      }
-
-      galleryList.innerHTML = allImages.map(file => `
-        <div class="file-item">
-          <div class="file-thumbnail">
-            <img src="images/${file.collection}/${file.name}" alt="${file.name}" style="width: 100%; height: 100%; object-fit: cover;">
-          </div>
-          <div class="file-info">
-            <div class="file-name">${file.name}</div>
-            <div class="file-size">${this.formatFileSize(file.size)}</div>
-            <div class="file-collection">${file.collection}</div>
-            <div class="file-actions">
-              <a href="images/${file.collection}/${file.name}" target="_blank" class="file-action-btn">View</a>
-            </div>
-          </div>
+      videoList.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">⚠️</div>
+          <p class="empty-state-title">Error loading videos</p>
+          <p class="empty-state-text">GitHub API may be unavailable. Try again later.</p>
         </div>
-      `).join('');
-    } catch (error) {
-      console.error('Error loading gallery:', error);
-      galleryList.innerHTML = '<p class="loading">Error loading gallery.</p>';
+      `;
     }
   }
 
-  // ==================== UPLOAD HANDLERS ====================
+  // ==================== SETTINGS TAB ====================
 
-  setupUploadHandlers() {
-    const videoUploadArea = document.getElementById('videoUploadArea');
-    const galleryUploadArea = document.getElementById('galleryUploadArea');
+  setupSettingsTab() {
+    // Add export/import buttons dynamically
+    const settingsTab = document.getElementById('settingsTab');
+    if (!settingsTab) return;
 
-    if (videoUploadArea) {
-      videoUploadArea.addEventListener('dragover', (e) => this.handleDragOver(e));
-      videoUploadArea.addEventListener('dragleave', (e) => this.handleDragLeave(e));
-      videoUploadArea.addEventListener('drop', (e) => this.handleUploadDrop(e, 'video'));
+    // Add data management section
+    const dataSection = document.createElement('div');
+    dataSection.className = 'settings-section';
+    dataSection.innerHTML = `
+      <h3>Data Management</h3>
+      <p>Export or import your admin panel data including articles, galleries, and page content.</p>
+      <div class="form-actions" style="border-top: none; padding-top: var(--space-md);">
+        <button type="button" id="exportDataBtn" class="btn-primary">Export All Data</button>
+        <button type="button" id="importDataBtn" class="btn-secondary">Import Data</button>
+        <button type="button" id="clearDataBtn" class="btn-danger btn-small">Clear All Data</button>
+      </div>
+      <input type="file" id="importDataInput" accept=".json" style="display: none;">
+    `;
+
+    // Insert after the first settings section
+    const firstSection = settingsTab.querySelector('.settings-section');
+    if (firstSection) {
+      firstSection.parentNode.insertBefore(dataSection, firstSection.nextSibling);
     }
 
-    if (galleryUploadArea) {
-      galleryUploadArea.addEventListener('dragover', (e) => this.handleDragOver(e));
-      galleryUploadArea.addEventListener('dragleave', (e) => this.handleDragLeave(e));
-      galleryUploadArea.addEventListener('drop', (e) => this.handleUploadDrop(e, 'gallery'));
+    // Add event listeners
+    document.getElementById('exportDataBtn')?.addEventListener('click', () => this.exportData());
+    document.getElementById('importDataBtn')?.addEventListener('click', () => {
+      document.getElementById('importDataInput')?.click();
+    });
+    document.getElementById('importDataInput')?.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) this.importData(file);
+    });
+    document.getElementById('clearDataBtn')?.addEventListener('click', () => this.clearAllData());
+  }
+
+  exportData() {
+    const data = {
+      exportDate: new Date().toISOString(),
+      version: '1.0',
+      articles: JSON.parse(localStorage.getItem('articles') || '[]'),
+      galleries: JSON.parse(localStorage.getItem('galleries') || '{}'),
+      homepageContent: JSON.parse(localStorage.getItem('homepageContent') || '{}'),
+      aboutContent: JSON.parse(localStorage.getItem('aboutContent') || '{}')
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `admin-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    Toast.success('Data exported successfully');
+  }
+
+  importData(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+
+        if (!data.version) {
+          Toast.error('Invalid backup file format');
+          return;
+        }
+
+        if (data.articles) localStorage.setItem('articles', JSON.stringify(data.articles));
+        if (data.galleries) localStorage.setItem('galleries', JSON.stringify(data.galleries));
+        if (data.homepageContent) localStorage.setItem('homepageContent', JSON.stringify(data.homepageContent));
+        if (data.aboutContent) localStorage.setItem('aboutContent', JSON.stringify(data.aboutContent));
+
+        Toast.success('Data imported successfully! Refreshing...');
+        setTimeout(() => location.reload(), 1500);
+      } catch (error) {
+        Toast.error('Failed to parse backup file');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  clearAllData() {
+    if (!confirm('This will delete ALL your data including articles, galleries, and page content. This cannot be undone. Continue?')) {
+      return;
     }
-  }
 
-  handleDragOver(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.currentTarget.classList.add('dragover');
-  }
+    if (!confirm('Are you absolutely sure? Type "DELETE" mentally and click OK.')) {
+      return;
+    }
 
-  handleDragLeave(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.currentTarget.classList.remove('dragover');
-  }
+    localStorage.removeItem('articles');
+    localStorage.removeItem('galleries');
+    localStorage.removeItem('homepageContent');
+    localStorage.removeItem('aboutContent');
+    localStorage.removeItem('uploadedImages');
 
-  handleUploadDrop(e, type) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.currentTarget.classList.remove('dragover');
-
-    const files = e.dataTransfer.files;
-    if (files.length === 0) return;
-
-    this.showNotification(
-      `${files.length} file${files.length !== 1 ? 's' : ''} selected. Push to GitHub:\n\nGallery: images/[collection-name]/\nHomepage: images/homepage/`,
-      'info'
-    );
+    Toast.success('All data cleared. Refreshing...');
+    setTimeout(() => location.reload(), 1500);
   }
 
   // ==================== UTILITY FUNCTIONS ====================
@@ -1486,11 +1527,11 @@ class AdminPanel {
     html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
 
     // Blockquotes
-    html = html.replace(/^> (.*?)$/gm, '<blockquote>$1</blockquote>');
+    html = html.replace(/^&gt; (.*?)$/gm, '<blockquote>$1</blockquote>');
 
     // Lists
     html = html.replace(/^\* (.*?)$/gm, '<li>$1</li>');
-    html = html.replace(/(<li>.*?<\/li>)/s, '<ul>$1</ul>');
+    html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
 
     // Paragraphs
     html = html.split('\n\n').map(para => {
@@ -1514,7 +1555,7 @@ class AdminPanel {
   }
 
   formatFileSize(bytes) {
-    if (bytes === 0) return '0 B';
+    if (!bytes || bytes === 0) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -1528,17 +1569,14 @@ class AdminPanel {
   }
 
   escapeHtml(text) {
+    if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
-  }
-
-  showNotification(message, type = 'success') {
-    alert(message);
   }
 }
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-  new AdminPanel();
+  window.adminPanel = new AdminPanel();
 });
