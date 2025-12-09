@@ -55,4 +55,94 @@ html {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+
+  /* ========== 60FPS SMOOTH ANIMATIONS ========== */
+
+  /* Smooth page transitions */
+  body {
+        animation: fadeIn 0.4s ease-out;
+    }
+
+  /* Smooth link and button transitions */
+  a, button {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform, opacity;
+    }
+
+  a:hover, button:hover {
+        transform: translateY(-1px);
+    }
+
+  /* Smooth card entrance animations */
+  .collection-card, .story-card, .article-card {
+        animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        will-change: transform, opacity;
+    }
+
+  @keyframes slideUp {
+        from {
+                  opacity: 0;
+                  transform: translateY(30px);
+              }
+        to {
+                  opacity: 1;
+                  transform: translateY(0);
+              }
+    }
+
+  /* ========== ANIMATED CAT LOADER ========== */
+
+  /* Cat walking animation */
+  @keyframes catWalk {
+        0%, 100% { transform: translateX(0) scaleX(1); }
+        50% { transform: translateX(20px) scaleX(1); }
+    }
+
+  /* Cat sitting/licking animation */
+  @keyframes catLick {
+        0%, 80%, 100% { transform: rotate(0deg); }
+        40% { transform: rotate(-5deg); }
+    }
+
+  /* Cat sleeping animation */
+  @keyframes catNap {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(0.98); }
+    }
+
+  /* Cat loader container */
+  .cat-loader {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        font-size: 2rem;
+        z-index: 1000;
+        animation: catWalk 3s ease-in-out infinite;
+        transition: all 0.3s ease;
+    }
+
+  .cat-loader.loading {
+        animation: catWalk 2s ease-in-out infinite;
+    }
+
+  .cat-loader.idle {
+        animation: catLick 4s ease-in-out infinite;
+    }
+
+  .cat-loader.sleeping {
+        animation: catNap 3s ease-in-out infinite;
+    }
+
+  /* ========== PERFORMANCE OPTIMIZATIONS ========== */
+
+  /* GPU acceleration for smooth 60fps */
+  * {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+  img, video {
+        transform: translateZ(0);
+        backface-visibility: hidden;
+    }
 }
