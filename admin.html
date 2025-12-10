@@ -59,28 +59,60 @@
 
     <!-- Admin Dashboard -->
     <div id="adminDashboard" class="admin-dashboard" style="display: none;">
-
-        <div class="admin-header">
-            <div class="admin-header-content">
+        
+        <!-- Left Sidebar -->
+        <div class="admin-sidebar" id="adminSidebar">
+            <div class="admin-sidebar-header">
                 <h1>Admin Panel</h1>
-                <p>Manage your fine art collection</p>
+                <p>Fine Art Collection</p>
             </div>
-            <button id="logoutBtn" class="logout-button">Logout</button>
+            
+            <nav class="admin-nav">
+                <div class="admin-nav-item active" data-tab="dashboard">
+                    <span class="admin-nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </div>
+                <div class="admin-nav-item" data-tab="homepage">
+                    <span class="admin-nav-icon">🏠</span>
+                    <span>Homepage</span>
+                </div>
+                <div class="admin-nav-item" data-tab="about">
+                    <span class="admin-nav-icon">👤</span>
+                    <span>About</span>
+                </div>
+                <div class="admin-nav-item" data-tab="articles">
+                    <span class="admin-nav-icon">📝</span>
+                    <span>Articles</span>
+                </div>
+                <div class="admin-nav-item" data-tab="videos">
+                    <span class="admin-nav-icon">🎥</span>
+                    <span>Videos</span>
+                </div>
+                <div class="admin-nav-item" data-tab="gallery">
+                    <span class="admin-nav-icon">🖼️</span>
+                    <span>Gallery</span>
+                </div>
+                <div class="admin-nav-item" data-tab="settings">
+                    <span class="admin-nav-icon">⚙️</span>
+                    <span>Settings</span>
+                </div>
+            </nav>
+            
+            <div class="admin-sidebar-footer">
+                <button id="logoutBtn" class="admin-logout-btn">Logout</button>
+            </div>
+            
+            <!-- Toggle & Pin Controls -->
+            <button class="sidebar-toggle" id="sidebarToggle" title="Collapse sidebar">
+                <span>«</span>
+            </button>
+            <button class="sidebar-pin" id="sidebarPin" title="Pin sidebar">
+                📌
+            </button>
         </div>
-
-        <div class="admin-container">
-
-            <!-- Navigation Tabs -->
-            <div class="admin-tabs">
-                <button class="admin-tab-btn active" data-tab="dashboard">Dashboard</button>
-                <button class="admin-tab-btn" data-tab="homepage">Homepage</button>
-                <button class="admin-tab-btn" data-tab="about">About</button>
-                <button class="admin-tab-btn" data-tab="articles">Articles</button>
-                <button class="admin-tab-btn" data-tab="videos">Videos</button>
-                <button class="admin-tab-btn" data-tab="gallery">Gallery</button>
-                <button class="admin-tab-btn" data-tab="settings">Settings</button>
-            </div>
-
+        
+        <!-- Main Content Area -->
+        <div class="admin-main" id="adminMain">
             <!-- Dashboard Tab -->
             <div id="dashboardTab" class="admin-tab-content active">
                 <h2>Dashboard</h2>
