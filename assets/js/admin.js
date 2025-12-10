@@ -1613,7 +1613,68 @@ class AdminPanel {
   }
 }
 
+// ==================== SIDEBAR TOGGLE & PIN FUNCTIONALITY ====================
+
+function initSidebar() {
+    const sidebar = document.getElementById('adminSidebar');
+    const toggleBtn = document.getElementById('sidebarToggle');
+    const pinBtn = document.getElementById('sidebarPin');
+    
+    if (!sidebar || !toggleBtn || !pinBtn) return;
+    
+    // Load saved state from localStorage
+    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    const isPinned = localStorage.getItem('sidebarPinned') === 'true';
+    
+    if (isCollapsed) {
+        sidebar.classList.add('collapsed');
+    }
+    
+    if (isPinned) {
+        sidebar.classList.add('pinned');
+        pinBtn.classList.add('pinned');
+    }
+    
+    // Toggle collapse functionality
+    toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('collapsed');
+        const collapsed = sidebar.classList.contains('collapsed');
+        localStorage.setItem('sidebarCollapsed', collapsed);
+    });
+    
+    // Toggle pin functionality
+    pinBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('pinned');
+        pinBtn.classList.toggle('pinned');
+        const pinned = sidebar.classList.contains('pinned');
+        localStorage.setItem('sidebarPinned', pinned);
+    });
+    
+    // Update navigation to use new class names (replace old .admin-tab-btn logic)
+    document.querySelectorAll('.admin-nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.admin-nav-item').forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+            
+            const tab = this.getAttribute('data-tab');
+            document.querySelectorAll('.admin-tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            const activeContent = document.getElementById(tab + 'Tab');
+            if (activeContent) {
+                activeContent.classList.add('active');
+            }
+        });
+    });
+}
+
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
   window.adminPanel = new AdminPanel();
+
+      // Initialize sidebar toggle and pin functionality
+    initSidebar();
+
 });
