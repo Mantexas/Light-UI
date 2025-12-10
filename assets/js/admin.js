@@ -171,11 +171,12 @@ class AdminPanel {
     this.logoutBtn.addEventListener('click', () => this.handleLogout());
 
     // Tab switching
-    document.querySelectorAll('.admin-tab-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
-    });
+    // document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+      // btn.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
+    // });
   }
-
+// OLD CODE - DISABLED FOR NEW SIDEBAR
+        // 
   switchTab(tabName) {
     document.querySelectorAll('.admin-tab-content').forEach(tab => {
       tab.classList.remove('active');
