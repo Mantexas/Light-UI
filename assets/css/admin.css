@@ -387,4 +387,14 @@
         margin-left: 0;
         padding: 20px;
     }
+
+    /* ==================== TAB CONTENT VISIBILITY ==================== */
+
+.admin-tab-content {
+    display: none;
+}
+
+.admin-tab-content.active {
+    display: block;
+}
 }
